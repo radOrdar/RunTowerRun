@@ -1,0 +1,68 @@
+apply plugin: 'com.android.library'
+**APPLY_PLUGINS**
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+// Android Resolver Dependencies Start
+    implementation 'com.appodeal.ads.sdk.networks:adcolony:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/AdColonyDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:applovin:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/AppLovinDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:bidmachine:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/BidMachineDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:bidon:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/BidonDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:bigo_ads:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/BigoAdsDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:dt_exchange:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/DTExchangeDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:iab:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/IABDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:inmobi:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/InMobiDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:ironsource:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/IronSourceDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:meta:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/MetaAudienceNetworkDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:mintegral:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/MintegralDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:unity_ads:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/UnityDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk.networks:vungle:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/VungleDependencies.xml:4
+    implementation 'com.appodeal.ads.sdk:core:3.2.1' // Assets/Appodeal/Editor/Dependencies/AppodealDependencies.xml:7
+// Android Resolver Dependencies End
+**DEPS**}
+
+// Android Resolver Exclusions Start
+android {
+  packagingOptions {
+      exclude ('/lib/armeabi/*' + '*')
+      exclude ('/lib/mips/*' + '*')
+      exclude ('/lib/mips64/*' + '*')
+      exclude ('/lib/x86/*' + '*')
+      exclude ('/lib/x86_64/*' + '*')
+  }
+}
+// Android Resolver Exclusions End
+android {
+    ndkPath "**NDKPATH**"
+
+    compileSdkVersion **APIVERSION**
+    buildToolsVersion '**BUILDTOOLS**'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    defaultConfig {
+        minSdkVersion **MINSDKVERSION**
+        targetSdkVersion **TARGETSDKVERSION**
+        ndk {
+            abiFilters **ABIFILTERS**
+        }
+        versionCode **VERSIONCODE**
+        versionName '**VERSIONNAME**'
+        consumerProguardFiles 'proguard-unity.txt'**USER_PROGUARD**
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    aaptOptions {
+        noCompress = **BUILTIN_NOCOMPRESS** + unityStreamingAssets.tokenize(', ')
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }**PACKAGING_OPTIONS**
+}
+**IL_CPP_BUILD_SETUP**
+**SOURCE_BUILD_SETUP**
+**EXTERNAL_SOURCES**
