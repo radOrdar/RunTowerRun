@@ -16,7 +16,8 @@
 
         public static class PrefsKeys
         {
-            public const string REMOVE_ADS = "RemoveAds";
+            public const string LEVEL = "Level";
+            public const string SUBSCRIPTION_EXPIRATION = "SubExp";
         }
     }
 }

@@ -129,6 +129,7 @@ namespace Tower.Components
 
         private void Stop()
         {
+            _stopped = true;
             _targetSpeed = 0;
             _currentAcceleration = finishAcceleration;
         }

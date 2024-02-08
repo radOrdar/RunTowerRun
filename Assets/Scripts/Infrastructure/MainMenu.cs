@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Core;
 using Core.Loading;
@@ -9,59 +8,67 @@ using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
-   [SerializeField] private Button _continueBtn;
-   [SerializeField] private Button _newGameBtn;
-   [SerializeField] private Button _removeAdsBtn;
+    [SerializeField] private Button _continueBtn;
+    [SerializeField] private Button _newGameBtn;
+    [SerializeField] private Button _removeAdsBtn;
 
-   private void Start()
-   {
-      _continueBtn.onClick.AddListener(OnContinueBtnClicked);
-      _newGameBtn.onClick.AddListener(OnNewGameBtnClicked);
-      _removeAdsBtn.onClick.AddListener(OnRemoveAdsClicked);
-      
-      bool adsRemoved = PlayerPrefs.GetInt(Constants.PrefsKeys.REMOVE_ADS) == 1;
-      _removeAdsBtn.gameObject.SetActive(!adsRemoved);
+    private PersistentDataProvider _persistentData;
+    private EventsProvider _eventsProvider;
+    private IAPProvider _iapProvider;
+    private LoadingScreenProvider _loadingScreenProvider;
 
-      ProjectContext.I.EventsProvider.AdsRemoved += OnAdsRemoved;
-   }
+    private void Start()
+    {
+        _persistentData = ProjectContext.I.PersistentDataProvider;
+        _eventsProvider = ProjectContext.I.EventsProvider;
+        _iapProvider = ProjectContext.I.IAPProvider;
+        _loadingScreenProvider = ProjectContext.I.LoadingScreenProvider;
 
-   private void OnDestroy()
-   {
-      ProjectContext.I.EventsProvider.AdsRemoved -= OnAdsRemoved;
-   }
+        _continueBtn.onClick.AddListener(OnContinueBtnClicked);
+        _newGameBtn.onClick.AddListener(OnNewGameBtnClicked);
+        _removeAdsBtn.onClick.AddListener(OnRemoveAdsClicked);
 
-   private void OnAdsRemoved()
-   {
-      _removeAdsBtn.gameObject.SetActive(false);
-   }
+        bool notSubscriber = !_persistentData.TryGetSubscriptionExpirationDate(out DateTime expirationDateTime) || expirationDateTime.CompareTo(DateTime.Now) < 0;
+        _removeAdsBtn.gameObject.SetActive(notSubscriber);
 
-   private void OnRemoveAdsClicked()
-   {
-      ProjectContext.I.IAPProvider.BuyCancelAds();
-   }
+        _eventsProvider.AdsRemoved += OnAdsRemoved;
+    }
 
-   private void OnContinueBtnClicked()
-   {
-      DisableButtons();
+    private void OnDestroy()
+    {
+        _eventsProvider.AdsRemoved -= OnAdsRemoved;
+    }
 
-      ProjectContext.I.LoadingScreenProvider.LoadAndDestroy(new GameLoadingOperation());
-   }
+    private void OnAdsRemoved()
+    {
+        _removeAdsBtn.gameObject.SetActive(false);
+    }
 
-   private void OnNewGameBtnClicked()
-   {
-      DisableButtons();
-      
-      Queue<ILoadingOperation> operations = new();
-      operations.Enqueue(new ResetProgressOperation());
-      operations.Enqueue(new GameLoadingOperation());
-      
-      ProjectContext.I.LoadingScreenProvider.LoadAndDestroy(operations);
-   }
+    private void OnRemoveAdsClicked()
+    {
+        _iapProvider.BuyCancelAds();
+    }
 
-   private void DisableButtons()
-   {
-      _continueBtn.interactable = false;
-      _newGameBtn.interactable = false;
-      _removeAdsBtn.interactable = false;
-   }
+    private void OnContinueBtnClicked()
+    {
+        DisableButtons();
+
+        _loadingScreenProvider.LoadAndDestroy(new GameLoadingOperation());
+    }
+
+    private void OnNewGameBtnClicked()
+    {
+        DisableButtons();
+        
+        _persistentData.ResetProgress();
+
+        _loadingScreenProvider.LoadAndDestroy(new GameLoadingOperation());
+    }
+
+    private void DisableButtons()
+    {
+        _continueBtn.interactable = false;
+        _newGameBtn.interactable = false;
+        _removeAdsBtn.interactable = false;
+    }
 }

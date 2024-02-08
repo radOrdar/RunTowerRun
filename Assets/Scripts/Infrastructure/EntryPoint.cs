@@ -13,11 +13,5 @@ namespace Infrastructure
             Instantiate(appStartup);
          }
       }
-      
-      [ContextMenu("SetMaxLevel")]
-      public void SetMaxLevel()
-      {
-         PlayerPrefs.SetInt("Level", 20);
-      }
    }
 }

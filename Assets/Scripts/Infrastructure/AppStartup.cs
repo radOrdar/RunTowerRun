@@ -12,6 +12,7 @@ namespace Infrastructure
         private async void Awake()
         {
             DontDestroyOnLoad(this);
+            //TODO make app config
             Application.targetFrameRate = 60;
             if (SceneManager.GetActiveScene().name != Constants.Scenes.STARTUP)
             {
@@ -22,7 +23,6 @@ namespace Infrastructure
 
             var loadingOperations = new Queue<ILoadingOperation>();
             loadingOperations.Enqueue(ProjectContext.I.AssetProvider);
-            loadingOperations.Enqueue(new LoadProgressOperation());
             loadingOperations.Enqueue(new MenuLoadingOperation());
 
             ProjectContext.I.LoadingScreenProvider.LoadAndDestroy(loadingOperations);

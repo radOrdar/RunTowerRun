@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Core;
+using Core.Loading;
 using Cysharp.Threading.Tasks;
 using Obstacle;
 using StaticData;
@@ -25,14 +25,18 @@ namespace Infrastructure
         private AudioProvider _audioProvider;
         private EventsProvider _eventsProvider;
         private AdsProvider _adsProvider;
+        private PersistentDataProvider _persistentData;
+        private LoadingScreenProvider _loadingScreenProvider;
 
         private void Awake()
         {
             _audioProvider = ProjectContext.I.AudioProvider;
             _eventsProvider = ProjectContext.I.EventsProvider;
             _adsProvider = ProjectContext.I.AdsProvider;
-           
-            if (PlayerPrefs.GetInt(Constants.PrefsKeys.REMOVE_ADS) != 1)
+            _persistentData = ProjectContext.I.PersistentDataProvider;
+            _loadingScreenProvider = ProjectContext.I.LoadingScreenProvider;
+
+            if (!_persistentData.TryGetSubscriptionExpirationDate(out DateTime expirationDateTime) || expirationDateTime.CompareTo(DateTime.Now) < 0)
             {
                 _adsProvider.Initialize();
                 _adsProvider.ShowBanner();
@@ -40,7 +44,7 @@ namespace Infrastructure
             
             _audioProvider.PlayMusic();
 
-            int currentLevel = ProjectContext.I.UserContainer.Level;
+            int currentLevel = ProjectContext.I.PersistentDataProvider.GetLevel();
             levelText.SetText($"Level {currentLevel + 1}");
             nextLevelBtn.onClick.AddListener(NextLevel);
 
@@ -49,16 +53,15 @@ namespace Infrastructure
             FindAnyObjectByType<TowerMove>().Init(towerPattern.towerProjections, progressionUnit);
             FindAnyObjectByType<TowerBody>().Init(towerPattern.matrix);
             FindAnyObjectByType<TowerEffects>().Init(progressionUnit);
-            TowerCollision towerCollision = FindAnyObjectByType<TowerCollision>();
-            towerCollision.Init(towerPattern.matrix);
+            FindAnyObjectByType<TowerCollision>().Init(towerPattern.matrix);
             _eventsProvider.GateCollided += OnGateCollided;
             _eventsProvider.GatePassed += OnGatePassed;
             _eventsProvider.FinishPassed += OnFinishPassed;
 
             List<int[,]> gatePatterns = Enumerable.Range(0, progressionUnit.numOfGates).Select(_ => towerPattern.towerProjections[RandomDirection()]).ToList();
+            FindAnyObjectByType<AllGates>().Init(gatePatterns, progressionUnit.distanceBtwGates);
 
             Instantiate(finishPf, new Vector3(0, 0.1f, progressionUnit.numOfGates * progressionUnit.distanceBtwGates + 40), Quaternion.identity);
-            FindAnyObjectByType<AllGates>().Init(gatePatterns, progressionUnit.distanceBtwGates);
         }
 
         private void OnDestroy()
@@ -70,7 +73,7 @@ namespace Infrastructure
 
         private void NextLevel()
         {
-            ProjectContext.I.LoadingScreenProvider.LoadAndDestroy(new GameLoadingOperation());
+            _loadingScreenProvider.LoadAndDestroy(new GameLoadingOperation());
         }
         
         private void OnGatePassed()
@@ -86,9 +89,8 @@ namespace Infrastructure
         private async void OnFinishPassed()
         {
             _audioProvider.PlayFinish();
-            ProjectContext.I.UserContainer.Level++;
-            ProjectContext.I.SaveSystemProvider.SaveProgress();
-            await UniTask.Delay(2000);
+            _persistentData.SaveLevel(_persistentData.GetLevel() + 1);
+            await UniTask.Delay(3000);
             _adsProvider.ShowInterstitial();
             await UniTask.Delay(2000);
             nextLevelBtn.gameObject.SetActive(true);

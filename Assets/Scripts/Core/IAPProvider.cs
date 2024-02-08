@@ -7,12 +7,14 @@ using UnityEngine;
 public class IAPProvider
 {
     public bool Initialized { get; private set; }
-    
-    private List<StoreProduct> _shopProducts;
 
+    private PersistentDataProvider _persistentData;
+
+    private List<StoreProduct> _shopProducts;
 
     public IAPProvider()
     {
+        _persistentData = ProjectContext.I.PersistentDataProvider;
         API.Initialize(InitializationComplete);
     }
 
@@ -32,7 +34,7 @@ public class IAPProvider
                     if (shopProducts[i].active)
                     {
                         Debug.Log("Cancel Ads");
-                        PlayerPrefs.SetInt(Constants.PrefsKeys.REMOVE_ADS, 1);
+                        _persistentData.SaveSubscriptionExpirationDate(shopProducts[i].subscriptionInfo.getExpireDate());
                     }
                 }
             }
@@ -48,22 +50,21 @@ public class IAPProvider
         //  this is the normal implementation
         // but since your products will not have the same names, we will use the string version to avoid compile error
 
-         API.BuyProduct(ShopProductNames.CancelAds, ProductBought);
+        API.BuyProduct(ShopProductNames.CancelAds, ProductBought);
     }
-    
+
     private void ProductBought(IAPOperationStatus status, string message, StoreProduct product)
     {
         if (status == IAPOperationStatus.Success)
         {
             if (product.productName == "CancelAds")
             {
-                PlayerPrefs.SetInt(Constants.PrefsKeys.REMOVE_ADS, 1);
                 Debug.Log("Cancel Ads");
+                _persistentData.SaveSubscriptionExpirationDate(product.subscriptionInfo.getExpireDate());
                 ProjectContext.I.AdsProvider.RemoveAds();
                 ProjectContext.I.EventsProvider.OnAdsRemoved();
             }
-        }
-        else
+        } else
         {
             //Tooltip show operation failure
             Debug.Log("Error occurred: " + message);
