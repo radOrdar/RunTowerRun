@@ -17,143 +17,143 @@ MonoBehaviour:
     ledges: 3
     normalSpeed: 25
     hasteSpeed: 55
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 8
     ledges: 3
     normalSpeed: 30
     hasteSpeed: 60
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 8
     ledges: 3
     normalSpeed: 35
     hasteSpeed: 65
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 8
     ledges: 3
     normalSpeed: 40
     hasteSpeed: 70
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 9
     ledges: 3
     normalSpeed: 25
     hasteSpeed: 55
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 9
     ledges: 3
     normalSpeed: 30
     hasteSpeed: 60
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 9
     ledges: 3
     normalSpeed: 35
     hasteSpeed: 65
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 9
     ledges: 3
     normalSpeed: 40
     hasteSpeed: 70
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 10
     ledges: 3
     normalSpeed: 25
     hasteSpeed: 55
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 10
     ledges: 3
     normalSpeed: 30
     hasteSpeed: 60
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 10
     ledges: 3
     normalSpeed: 35
     hasteSpeed: 65
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 10
     ledges: 3
     normalSpeed: 40
     hasteSpeed: 70
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 10
     ledges: 4
     normalSpeed: 25
     hasteSpeed: 55
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 10
     ledges: 4
     normalSpeed: 30
     hasteSpeed: 60
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 10
     ledges: 4
     normalSpeed: 35
     hasteSpeed: 65
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 10
     ledges: 4
     normalSpeed: 40
     hasteSpeed: 70
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 11
     ledges: 4
     normalSpeed: 25
     hasteSpeed: 55
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 11
     ledges: 4
     normalSpeed: 30
     hasteSpeed: 60
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 11
     ledges: 4
     normalSpeed: 35
     hasteSpeed: 65
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 11
     ledges: 4
     normalSpeed: 40
     hasteSpeed: 70
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 12
     ledges: 4
     normalSpeed: 25
     hasteSpeed: 55
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 12
     ledges: 4
     normalSpeed: 30
     hasteSpeed: 60
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 12
     ledges: 4
     normalSpeed: 35
     hasteSpeed: 65
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80
   - height: 12
     ledges: 4
     normalSpeed: 40
     hasteSpeed: 70
-    numOfGates: 10
+    numOfGates: 20
     distanceBtwGates: 80

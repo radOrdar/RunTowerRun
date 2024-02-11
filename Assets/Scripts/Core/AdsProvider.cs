@@ -9,7 +9,7 @@ public class AdsProvider : MonoBehaviour
 {
     [SerializeField] private bool isTestMode;
     
-    private const string AppKey = "89dd55964f87db9d175943d5de2e415c2fc20d3826b3766b";
+    private const string AppKey = "a287d5f56949919de334e67dc0188e8f68c19f09704bea5a";
 
     private bool _active;
 
