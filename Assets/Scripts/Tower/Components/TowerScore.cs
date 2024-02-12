@@ -12,19 +12,19 @@ namespace Tower.Components
     public class TowerScore : MonoBehaviour
     {
         [SerializeField] private float tickPeriod = 0.2f;
-        [SerializeField] private ScoreGainFx gainFx;
         [SerializeField] private StreakFx streakFx;
         [SerializeField] private TextMeshProUGUI scoreText;
 
-        private EventsProvider eventsProvider;
-        
+        private EventsProvider _eventsProvider;
+        private AssetProvider _assetProvider;
+
+        private ScoreGainFx _gainFxPf;
         private IObjectPool<ScoreGainFx> _poolScoreGainFx;
 
         private int _streak;
         private float _lastStreakChangeTime;
         private float _lastResetStreakTime;
-
-
+        
         private int Streak
         {
             get => _streak;
@@ -38,14 +38,17 @@ namespace Tower.Components
         private bool _gaining;
         private int _score;
 
-        private void Start()
+        private async void Start()
         {
-            eventsProvider = ProjectContext.I.EventsProvider;
+            _eventsProvider = ProjectContext.I.EventsProvider;
+            _assetProvider = ProjectContext.I.AssetProvider;
+
+            _gainFxPf = await _assetProvider.LoadAsync<ScoreGainFx>(Constants.Assets.SCORE_GAIN_FX_PF);
             
             _poolScoreGainFx = new ObjectPool<ScoreGainFx>(
                 createFunc: () =>
                 {
-                    var s = Instantiate(gainFx, transform);
+                    var s = Instantiate(_gainFxPf, transform);
                     s.Origin = _poolScoreGainFx;
                     return s;
                 },
@@ -56,20 +59,22 @@ namespace Tower.Components
                 actionOnRelease: g => g.gameObject.SetActive(false)
             );
             
-            eventsProvider.GatePassed += StreakIncrease;
-            eventsProvider.GateCollided += ResetStreak;
-            eventsProvider.FinishPassed += OnFinishPassed;
-            eventsProvider.HasteSwitch += SetActiveGaining;
+            _eventsProvider.GatePassed += StreakIncrease;
+            _eventsProvider.GateCollided += ResetStreak;
+            _eventsProvider.FinishPassed += OnFinishPassed;
+            _eventsProvider.HasteSwitch += SetActiveGaining;
             Streak = 1;
             StartCoroutine(ScoreTick());
         }
 
         private void OnDestroy()
         {
-            eventsProvider.GatePassed -= StreakIncrease;
-            eventsProvider.GateCollided -= ResetStreak;
-            eventsProvider.FinishPassed -= OnFinishPassed;
-            eventsProvider.HasteSwitch -= SetActiveGaining;
+            _eventsProvider.GatePassed -= StreakIncrease;
+            _eventsProvider.GateCollided -= ResetStreak;
+            _eventsProvider.FinishPassed -= OnFinishPassed;
+            _eventsProvider.HasteSwitch -= SetActiveGaining;
+            
+            // _assetProvider.UnloadAsset(_gainFxPf.gameObject);
         }
 
         private void SetActiveGaining(bool enable)

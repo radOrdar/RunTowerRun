@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using Obstacle;
 using StaticData;
 using TMPro;
+using Tower;
 using Tower.Components;
 using Tower.Data;
 using UnityEngine;
@@ -18,7 +19,6 @@ namespace Infrastructure
     public class LevelController : MonoBehaviour
     {
         [SerializeField] private LevelProgressionData levelProgressionData;
-        [SerializeField] private Finish finishPf;
         [SerializeField] private TextMeshProUGUI levelText;
         [SerializeField] private Button nextLevelBtn;
 
@@ -27,21 +27,25 @@ namespace Infrastructure
         private AdsProvider _adsProvider;
         private PersistentDataProvider _persistentData;
         private LoadingScreenProvider _loadingScreenProvider;
+        private AssetProvider _assetProvider;
 
-        private void Awake()
+        private Finish _finish;
+
+        private async void Awake()
         {
             _audioProvider = ProjectContext.I.AudioProvider;
             _eventsProvider = ProjectContext.I.EventsProvider;
             _adsProvider = ProjectContext.I.AdsProvider;
             _persistentData = ProjectContext.I.PersistentDataProvider;
             _loadingScreenProvider = ProjectContext.I.LoadingScreenProvider;
+            _assetProvider = ProjectContext.I.AssetProvider;
 
             if (!_persistentData.TryGetSubscriptionExpirationDate(out DateTime expirationDateTime) || expirationDateTime.CompareTo(DateTime.Now) < 0)
             {
                 _adsProvider.Initialize();
                 _adsProvider.ShowBanner();
             }
-            
+
             _audioProvider.PlayMusic();
 
             int currentLevel = ProjectContext.I.PersistentDataProvider.GetLevel();
@@ -61,7 +65,7 @@ namespace Infrastructure
             List<int[,]> gatePatterns = Enumerable.Range(0, progressionUnit.numOfGates).Select(_ => towerPattern.towerProjections[RandomDirection()]).ToList();
             FindAnyObjectByType<AllGates>().Init(gatePatterns, progressionUnit.distanceBtwGates);
 
-            Instantiate(finishPf, new Vector3(0, 0.1f, progressionUnit.numOfGates * progressionUnit.distanceBtwGates + 40), Quaternion.identity);
+            _finish = await _assetProvider.InstantiateAsync<Finish>(Constants.Assets.FINISHLINE, new Vector3(0, 0.1f, progressionUnit.numOfGates * progressionUnit.distanceBtwGates + 40), Quaternion.identity);
         }
 
         private void OnDestroy()
@@ -69,13 +73,18 @@ namespace Infrastructure
             _eventsProvider.GateCollided -= OnGateCollided;
             _eventsProvider.GatePassed -= OnGatePassed;
             _eventsProvider.FinishPassed -= OnFinishPassed;
+
+            if (_finish != null)
+            {
+                _assetProvider.UnloadInstance(_finish.gameObject);
+            }
         }
 
         private void NextLevel()
         {
             _loadingScreenProvider.LoadAndDestroy(new GameLoadingOperation());
         }
-        
+
         private void OnGatePassed()
         {
             _audioProvider.PlayDing();

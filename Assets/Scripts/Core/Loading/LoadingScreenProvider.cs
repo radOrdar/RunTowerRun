@@ -19,7 +19,7 @@ namespace Core.Loading
             LoadingScreen loadingScreen = await assetProvider.InstantiateAsync<LoadingScreen>(Constants.Assets.LOADING_SCREEN);
             
             await loadingScreen.Load(loadingOperations);
-            assetProvider.Unload(loadingScreen.gameObject);
+            assetProvider.UnloadInstance(loadingScreen.gameObject);
         }
     }
 }

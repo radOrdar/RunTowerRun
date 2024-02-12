@@ -6,7 +6,7 @@ using Tower.Data;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Core
+namespace Tower
 {
     public class TowerGenerator
     {
