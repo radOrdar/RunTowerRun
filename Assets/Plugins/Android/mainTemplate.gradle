@@ -6,7 +6,9 @@ dependencies {
 // Android Resolver Dependencies Start
     implementation 'com.appodeal.ads.sdk.networks:adcolony:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/AdColonyDependencies.xml:4
     implementation 'com.appodeal.ads.sdk.networks:applovin:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/AppLovinDependencies.xml:4
-    implementation 'com.appodeal.ads.sdk.networks:bidmachine:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/BidMachineDependencies.xml:4
+    implementation ('com.appodeal.ads.sdk.networks:bidmachine:3.2.1.0') {  // Assets/Appodeal/Editor/Dependencies/BidMachineDependencies.xml:4
+        exclude(group: 'io.bidmachine', module: 'ads.networks.tapjoy')
+    }    
     implementation 'com.appodeal.ads.sdk.networks:bidon:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/BidonDependencies.xml:4
     implementation 'com.appodeal.ads.sdk.networks:bigo_ads:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/BigoAdsDependencies.xml:4
     implementation 'com.appodeal.ads.sdk.networks:dt_exchange:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/DTExchangeDependencies.xml:4
@@ -17,7 +19,7 @@ dependencies {
     implementation 'com.appodeal.ads.sdk.networks:mintegral:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/MintegralDependencies.xml:4
     implementation 'com.appodeal.ads.sdk.networks:unity_ads:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/UnityDependencies.xml:4
     implementation 'com.appodeal.ads.sdk.networks:vungle:3.2.1.0' // Assets/Appodeal/Editor/Dependencies/VungleDependencies.xml:4
-    implementation 'com.appodeal.ads.sdk:core:3.2.1' // Assets/Appodeal/Editor/Dependencies/AppodealDependencies.xml:7
+    implementation 'com.appodeal.ads.sdk:core:3.2.1' // Assets/Appodeal/Editor/Dependencies/AppodealDependencies.xml:7       
 // Android Resolver Dependencies End
 **DEPS**}
 

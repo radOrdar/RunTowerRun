@@ -22,10 +22,10 @@ MonoBehaviour:
   useForMac: 0
   useForWindows: 0
   shopProducts:
-  - productName: CancelAds
+  - productName: StopAds
     productType: 2
     idGooglePlay: 
-    idAmazon: com.onimka.towerrunner.cancelads
+    idAmazon: com.onimka.towerrunner.stopads
     idIOS: 
     idMac: 
     idWindows: 
