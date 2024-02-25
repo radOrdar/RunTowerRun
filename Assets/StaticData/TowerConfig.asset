@@ -12,5 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e937dcbf496b49559e4b5451005a7bdb, type: 3}
   m_Name: TowerConfig
   m_EditorClassIdentifier: 
-  towerBlockPf: {fileID: 3798275367899508046, guid: 68909ffb5df163249ae6c74a6752ef81,
-    type: 3}
+  bounceBackSpeed: 3
+  acceleration: 15
+  bounceAcceleration: 4.5
+  finishAcceleration: 100
+  bounceAccelerationDelay: 1.5
+  scoreTickPeriod: 0.2
+  manualRotationSpeed: 1
+  autoRotateSpeed: 360
+  rotationControlType: 0

@@ -14,7 +14,6 @@ namespace Infrastructure
         public EventsProvider EventsProvider { get; private set; }
         public InputProvider InputProvider { get; private set; }
         public AdsProvider AdsProvider { get; private set; }
-        public IAPProvider IAPProvider { get; private set; }
         public StaticDataProvider StaticDataProvider { get; private set; }
 
         public static ProjectContext I { get; private set; }
@@ -35,7 +34,6 @@ namespace Infrastructure
             EventsProvider = new EventsProvider();
             InputProvider = new InputProvider();
             AdsProvider = GetComponentInChildren<AdsProvider>();
-            IAPProvider = new IAPProvider();
             StaticDataProvider = GetComponentInChildren<StaticDataProvider>();
         }
 

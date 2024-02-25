@@ -14,19 +14,16 @@ namespace Infrastructure
 
         private PersistentDataProvider _persistentData;
         private EventsProvider _eventsProvider;
-        private IAPProvider _iapProvider;
         private LoadingScreenProvider _loadingScreenProvider;
 
         private void Start()
         {
             _persistentData = ProjectContext.I.PersistentDataProvider;
             _eventsProvider = ProjectContext.I.EventsProvider;
-            _iapProvider = ProjectContext.I.IAPProvider;
             _loadingScreenProvider = ProjectContext.I.LoadingScreenProvider;
 
             _continueBtn.onClick.AddListener(OnContinueBtnClicked);
             _newGameBtn.onClick.AddListener(OnNewGameBtnClicked);
-            _removeAdsBtn.onClick.AddListener(OnRemoveAdsClicked);
 
             bool notSubscriber = !_persistentData.TryGetSubscriptionExpirationDate(out DateTime expirationDateTime) || expirationDateTime.CompareTo(DateTime.Now) < 0;
             _removeAdsBtn.gameObject.SetActive(notSubscriber);
@@ -42,11 +39,6 @@ namespace Infrastructure
         private void OnAdsRemoved()
         {
             _removeAdsBtn.gameObject.SetActive(false);
-        }
-
-        private void OnRemoveAdsClicked()
-        {
-            _iapProvider.BuyCancelAds();
         }
 
         private void OnContinueBtnClicked()

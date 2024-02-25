@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Core;
@@ -13,42 +14,51 @@ namespace Tower.Components
     {
         [SerializeField] private Transform bodyTransform;
 
-        [SerializeField] private float bounceBackSpeed = 3;
-        [SerializeField] private float acceleration = 30;
-        [SerializeField] private float bounceAcceleration = 3;
-        [SerializeField] private float finishAcceleration = 150;
-        [SerializeField] private float bounceAccelerationDelay = 1.5f;
-        
-        private EventsProvider _eventsProvider;
-        private AllGates _allGates;
+        #region Configuration
         
         private Dictionary<Vector3, int[,]> _towerProjections;
         private float _moveSpeed;
         private float _hasteMoveSpeed;
-        
+        private TowerConfigurationData _towerConfig;
+
+        #endregion
+
+        #region Dependencies
+
+        private EventsProvider _eventsProvider;
+        private AllGates _allGates;
+
+        #endregion
+
+        #region CurrentState
+
         private float _targetSpeed;
         private float _currentSpeed;
         private float _currentAcceleration;
         private bool _slowedDown;
         private bool _stopped;
 
+        #endregion
+
         public void Init(Dictionary<Vector3, int[,]> towerProjections, ProgressionUnit progressionUnit)
         {
+            _eventsProvider = ProjectContext.I.EventsProvider;
+            _towerConfig = ProjectContext.I.StaticDataProvider.TowerConfigurationData;
+            _allGates = FindAnyObjectByType<AllGates>();
+
             _moveSpeed = progressionUnit.normalSpeed;
             _hasteMoveSpeed = progressionUnit.hasteSpeed;
             _towerProjections = towerProjections;
-        }
-        
-        private void Start()
-        {
-            _eventsProvider = ProjectContext.I.EventsProvider;
-            _allGates = FindAnyObjectByType<AllGates>();
+
+            _targetSpeed = _moveSpeed;
+            _currentAcceleration = _towerConfig.acceleration;
             
             _eventsProvider.GateCollided += BounceBack;
             _eventsProvider.FinishPassed += Stop;
-            
-            _targetSpeed = _moveSpeed;
-            _currentAcceleration = acceleration;
+        }
+
+        private void Start()
+        {
             StartCoroutine(CheckGateForm());
         }
 
@@ -68,11 +78,10 @@ namespace Tower.Components
         {
             while (true)
             {
-                if(_stopped)
+                if (_stopped)
                     break;
                 if (!_slowedDown)
                 {
-                    
                     if (_towerProjections.TryGetValue(bodyTransform.forward, out int[,] proj) &&
                         _allGates.TryGetNextGatePattern(out int[,] gatePattern) &&
                         EqualityCheck(proj, gatePattern))
@@ -113,17 +122,17 @@ namespace Tower.Components
 
         private void BounceBack()
         {
-            _currentSpeed = -bounceBackSpeed;
+            _currentSpeed = -_towerConfig.bounceBackSpeed;
             StartCoroutine(BounceAccelerationRoutine());
         }
 
         private IEnumerator BounceAccelerationRoutine()
         {
-            _currentAcceleration = bounceAcceleration;
+            _currentAcceleration = _towerConfig.bounceAcceleration;
             _slowedDown = true;
             _eventsProvider.OnHasteSwitch(false);
-            yield return WaitForSecondsPool.Get(bounceAccelerationDelay);
-            _currentAcceleration = acceleration;
+            yield return WaitForSecondsPool.Get(_towerConfig.bounceAccelerationDelay);
+            _currentAcceleration = _towerConfig.acceleration;
             _slowedDown = false;
         }
 
@@ -131,7 +140,7 @@ namespace Tower.Components
         {
             _stopped = true;
             _targetSpeed = 0;
-            _currentAcceleration = finishAcceleration;
+            _currentAcceleration = _towerConfig.finishAcceleration;
         }
     }
 }

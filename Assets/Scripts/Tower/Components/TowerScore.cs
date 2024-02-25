@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using Core;
 using Infrastructure;
+using StaticData;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -11,20 +12,24 @@ namespace Tower.Components
     [RequireComponent(typeof(TowerMove))]
     public class TowerScore : MonoBehaviour
     {
-        [SerializeField] private float tickPeriod = 0.2f;
         [SerializeField] private StreakFx streakFx;
         [SerializeField] private TextMeshProUGUI scoreText;
+        
+        private TowerConfigurationData _towerConfig;
+
+        #region Dependencies
 
         private EventsProvider _eventsProvider;
         private AssetProvider _assetProvider;
 
-        private ScoreGainFx _gainFxPf;
-        private IObjectPool<ScoreGainFx> _poolScoreGainFx;
+        #endregion
 
-        private int _streak;
+        #region State
+
         private float _lastStreakChangeTime;
         private float _lastResetStreakTime;
-        
+        private int _streak;
+
         private int Streak
         {
             get => _streak;
@@ -38,13 +43,19 @@ namespace Tower.Components
         private bool _gaining;
         private int _score;
 
+        #endregion
+        
+        private ScoreGainFx _gainFxPf;
+        private IObjectPool<ScoreGainFx> _poolScoreGainFx;
+
         private async void Start()
         {
             _eventsProvider = ProjectContext.I.EventsProvider;
             _assetProvider = ProjectContext.I.AssetProvider;
+            _towerConfig = ProjectContext.I.StaticDataProvider.TowerConfigurationData;
 
             _gainFxPf = await _assetProvider.LoadAsync<ScoreGainFx>(Constants.Assets.SCORE_GAIN_FX_PF);
-            
+
             _poolScoreGainFx = new ObjectPool<ScoreGainFx>(
                 createFunc: () =>
                 {
@@ -58,7 +69,7 @@ namespace Tower.Components
                 },
                 actionOnRelease: g => g.gameObject.SetActive(false)
             );
-            
+
             _eventsProvider.GatePassed += StreakIncrease;
             _eventsProvider.GateCollided += ResetStreak;
             _eventsProvider.FinishPassed += OnFinishPassed;
@@ -73,8 +84,6 @@ namespace Tower.Components
             _eventsProvider.GateCollided -= ResetStreak;
             _eventsProvider.FinishPassed -= OnFinishPassed;
             _eventsProvider.HasteSwitch -= SetActiveGaining;
-            
-            // _assetProvider.UnloadAsset(_gainFxPf.gameObject);
         }
 
         private void SetActiveGaining(bool enable)
@@ -121,7 +130,7 @@ namespace Tower.Components
                     _poolScoreGainFx.Get().SetValue(_streak);
                 }
 
-                yield return WaitForSecondsPool.Get(tickPeriod);
+                yield return WaitForSecondsPool.Get(_towerConfig.scoreTickPeriod);
             }
         }
 

@@ -1,39 +1,41 @@
 ﻿using System;
 using Core;
 using Infrastructure;
+using StaticData;
 using UnityEngine;
 
 namespace Tower.Components
 {
     public class TowerRotation : MonoBehaviour
     {
-        public enum RotationControlType
-        {
-            Auto = 0,
-            Manual = 10
-        }
-
         [SerializeField] private Transform bodyTransform;
-        [SerializeField] private float manualRotationSpeed = 3;
-        [SerializeField] private float autoRotateSpeed = 90;
 
-        [SerializeField] private RotationControlType rotationControlType;
+        private TowerConfigurationData _towerConfig;
 
-        private Vector3[] _directions = { Vector3.forward, Vector3.right, Vector3.back, Vector3.left, };
+        #region Dependencies
 
         private InputProvider _inputProvider;
         private EventsProvider _eventsProvider;
         private Camera _mainCamera;
+
+        #endregion
+
+        #region State
 
         private int currDirIndex;
         private Vector3 _prevMousePos;
         private Quaternion _targetRotation;
         private bool _stopped;
 
+        #endregion
+        
+        private Vector3[] _directions = { Vector3.forward, Vector3.right, Vector3.back, Vector3.left };
+
         private void Start()
         {
             _inputProvider = ProjectContext.I.InputProvider;
             _eventsProvider = ProjectContext.I.EventsProvider;
+            _towerConfig = ProjectContext.I.StaticDataProvider.TowerConfigurationData;
             _mainCamera = Camera.main;
 
             _eventsProvider.FinishPassed += Stop;
@@ -49,10 +51,10 @@ namespace Tower.Components
             if (_stopped)
                 return;
 
-            if (rotationControlType == RotationControlType.Manual)
+            if (_towerConfig.rotationControlType == RotationControlType.Manual)
             {
                 ManualRotation();
-            } else if (rotationControlType == RotationControlType.Auto)
+            } else if (_towerConfig.rotationControlType == RotationControlType.Auto)
             {
                 AutoRotation();
             }
@@ -70,19 +72,21 @@ namespace Tower.Components
                 {
                     currDirIndex--;
                 }
-                
+
                 if (currDirIndex < 0)
                 {
                     currDirIndex = _directions.Length - 1;
                 }
+
                 if (currDirIndex > _directions.Length - 1)
                 {
                     currDirIndex = 0;
                 }
-                
+
                 _targetRotation = Quaternion.LookRotation(_directions[currDirIndex]);
             }
-            bodyTransform.rotation = Quaternion.RotateTowards(bodyTransform.rotation, _targetRotation, autoRotateSpeed * Time.deltaTime);
+
+            bodyTransform.rotation = Quaternion.RotateTowards(bodyTransform.rotation, _targetRotation, _towerConfig.autoRotateSpeed * Time.deltaTime);
         }
 
         private void ManualRotation()
@@ -95,11 +99,11 @@ namespace Tower.Components
             if (_inputProvider.GetMouseButton(0))
             {
                 Vector3 mousePosition = _inputProvider.MousePosition;
-                bodyTransform.Rotate(Vector3.up, (mousePosition - _prevMousePos).x * manualRotationSpeed, Space.World);
+                bodyTransform.Rotate(Vector3.up, (mousePosition - _prevMousePos).x * _towerConfig.manualRotationSpeed, Space.World);
                 _prevMousePos = mousePosition;
             } else
             {
-                bodyTransform.rotation = Quaternion.RotateTowards(bodyTransform.rotation, _targetRotation, autoRotateSpeed * Time.deltaTime);
+                bodyTransform.rotation = Quaternion.RotateTowards(bodyTransform.rotation, _targetRotation, _towerConfig.autoRotateSpeed * Time.deltaTime);
             }
 
             if (_inputProvider.GetMouseButtonUp(0))

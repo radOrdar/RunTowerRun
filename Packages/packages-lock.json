@@ -14,7 +14,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "66de0d3a58b256b6e0194f285cc530fd0c08407b"
+      "hash": "809d23edae0df58fd0f61b4b6f67855c59d1b2fb"
     },
     "com.google.external-dependency-manager": {
       "version": "file:D:/Downloads/com.google.external-dependency-manager-1.2.177.tgz",
@@ -87,6 +87,13 @@
     "com.unity.mathematics": {
       "version": "1.2.6",
       "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.mobile.android-logcat": {
+      "version": "1.4.0",
+      "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
