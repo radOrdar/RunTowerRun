@@ -1,6 +1,9 @@
 ﻿using System.Collections;
-using Core;
-using Infrastructure;
+using Cysharp.Threading.Tasks;
+using Services;
+using Services.Asset;
+using Services.Events;
+using Services.StaticData;
 using StaticData;
 using TMPro;
 using UnityEngine;
@@ -14,13 +17,14 @@ namespace Tower.Components
     {
         [SerializeField] private StreakFx streakFx;
         [SerializeField] private TextMeshProUGUI scoreText;
-        
+
         private TowerConfigurationData _towerConfig;
 
         #region Dependencies
 
-        private EventsProvider _eventsProvider;
-        private AssetProvider _assetProvider;
+        private IEventService _eventService;
+        private IAssetProvider _assetProvider;
+        private IStaticDataService _staticDataService;
 
         #endregion
 
@@ -44,18 +48,24 @@ namespace Tower.Components
         private int _score;
 
         #endregion
-        
+
         private ScoreGainFx _gainFxPf;
         private IObjectPool<ScoreGainFx> _poolScoreGainFx;
 
-        private async void Start()
+        public async UniTask Init()
         {
-            _eventsProvider = ProjectContext.I.EventsProvider;
-            _assetProvider = ProjectContext.I.AssetProvider;
-            _towerConfig = ProjectContext.I.StaticDataProvider.TowerConfigurationData;
+            ServiceLocator serviceLocator = ServiceLocator.Instance;
+            _eventService = serviceLocator.Get<IEventService>();
+            _assetProvider = serviceLocator.Get<IAssetProvider>();
+            _staticDataService = serviceLocator.Get<IStaticDataService>();
 
-            _gainFxPf = await _assetProvider.LoadAsync<ScoreGainFx>(Constants.Assets.SCORE_GAIN_FX_PF);
+            _eventService.GatePassed += StreakIncrease;
+            _eventService.GateCollided += ResetStreak;
+            _eventService.FinishPassed += OnFinishPassed;
+            _eventService.HasteSwitch += SetActiveGaining;
+            Streak = 1;
 
+            _gainFxPf = await _assetProvider.LoadComponentAsync<ScoreGainFx>(Constants.Assets.SCORE_GAIN_FX_PF);
             _poolScoreGainFx = new ObjectPool<ScoreGainFx>(
                 createFunc: () =>
                 {
@@ -69,21 +79,19 @@ namespace Tower.Components
                 },
                 actionOnRelease: g => g.gameObject.SetActive(false)
             );
-
-            _eventsProvider.GatePassed += StreakIncrease;
-            _eventsProvider.GateCollided += ResetStreak;
-            _eventsProvider.FinishPassed += OnFinishPassed;
-            _eventsProvider.HasteSwitch += SetActiveGaining;
-            Streak = 1;
+            _towerConfig = await _staticDataService.GetData<TowerConfigurationData>();
             StartCoroutine(ScoreTick());
         }
 
         private void OnDestroy()
         {
-            _eventsProvider.GatePassed -= StreakIncrease;
-            _eventsProvider.GateCollided -= ResetStreak;
-            _eventsProvider.FinishPassed -= OnFinishPassed;
-            _eventsProvider.HasteSwitch -= SetActiveGaining;
+            if (_eventService != null)
+            {
+                _eventService.GatePassed -= StreakIncrease;
+                _eventService.GateCollided -= ResetStreak;
+                _eventService.FinishPassed -= OnFinishPassed;
+                _eventService.HasteSwitch -= SetActiveGaining;
+            }
         }
 
         private void SetActiveGaining(bool enable)

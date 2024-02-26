@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using Object = UnityEngine.Object;
 
-namespace Core
+namespace Services.Asset
 {
-    public class AssetProvider : IDisposable
+    public class AssetProvider : IAssetProvider
     {
         private bool _isReady;
 
-        private Dictionary<string, GameObject> _cachedLoaded = new();
+        private Dictionary<string, Object> _cachedLoaded = new();
         private HashSet<GameObject> _cachedInstantiated = new();
 
         public async UniTask<T> InstantiateAsync<T>(string assetId, Transform parent = null) =>
@@ -34,47 +35,63 @@ namespace Core
             return component;
         }
 
-        public async UniTask<GameObject> LoadAsync(string assetId)
+        public async UniTask<Object> LoadAssetAsync(string assetId)
         {
-            if (_cachedLoaded.TryGetValue(assetId, out GameObject asset) == false)
+            if (_cachedLoaded.TryGetValue(assetId, out Object asset) == false)
             {
-                asset = await Addressables.LoadAssetAsync<GameObject>(assetId);
+                asset = await Addressables.LoadAssetAsync<Object>(assetId);
                 _cachedLoaded.Add(assetId, asset);
             }
-
+        
             return asset;
         }
 
-        public async UniTask<T> LoadAsync<T>(string assetId) where T : Component
+        public async UniTask<GameObject> LoadGameObjectAsync(string assetId) => 
+            (GameObject)await LoadAssetAsync(assetId);
+
+        public async UniTask<T> LoadComponentAsync<T>(string assetId) where T : Component
         {
-            bool notCached = false;
-            if (_cachedLoaded.TryGetValue(assetId, out GameObject asset) == false)
+            GameObject asset = await LoadGameObjectAsync(assetId);
+            if (asset.TryGetComponent(out T component) == false)
             {
-                asset = await Addressables.LoadAssetAsync<GameObject>(assetId);
-                notCached = true;
-            }
-
-            if (asset.TryGetComponent(out T component))
-            {
-                if (notCached)
-                {
-                    _cachedLoaded[assetId] = asset;
-                }
-            } else
-            {
-                if (notCached)
-                {
-                    Addressables.Release(asset);
-                }
-
+                UnloadAsset(asset);
                 throw new NullReferenceException($"Object of type {typeof(T)} is null on " +
-                                                 "attempt to load it from addressables");
+                                               "attempt to load it from addressables");
             }
 
             return component;
         }
 
-        public void UnloadAsset(GameObject asset)
+        // public async UniTask<T> LoadAsync<T>(string assetId)
+        // {
+        //     bool notCached = false;
+        //     if (_cachedLoaded.TryGetValue(assetId, out GameObject asset) == false)
+        //     {
+        //         asset = await Addressables.LoadAssetAsync<GameObject>(assetId);
+        //         notCached = true;
+        //     }
+        //
+        //     if (asset.TryGetComponent(out T component))
+        //     {
+        //         if (notCached)
+        //         {
+        //             _cachedLoaded[assetId] = asset;
+        //         }
+        //     } else
+        //     {
+        //         if (notCached)
+        //         {
+        //             Addressables.Release(asset);
+        //         }
+        //
+        //         throw new NullReferenceException($"Object of type {typeof(T)} is null on " +
+        //                                          "attempt to load it from addressables");
+        //     }
+        //
+        //     return component;
+        // }
+
+        public void UnloadAsset(Object asset)
         {
             string matchedKey = null;
             foreach (string key in _cachedLoaded.Keys)

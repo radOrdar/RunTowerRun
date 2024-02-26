@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Core
+namespace Services.Events
 {
-    public class EventsProvider
+    public class EventService : IEventService
     {
         public event Action GatePassed;
         public event Action GateCollided;

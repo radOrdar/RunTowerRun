@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Core
+namespace Services.Save
 {
-    public class PersistentDataProvider
+    public class PersistentDataService : IPersistentDataService
     {
         private DateTime _dateTimeExpirationSub;
         private int _level;

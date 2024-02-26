@@ -1,15 +1,14 @@
 ﻿using System.Collections.Generic;
-using Core;
-using Infrastructure;
 using Obstacle;
 using Services;
+using Services.Events;
 using UnityEngine;
 
 namespace Tower.Components
 {
     public class TowerCollision : MonoBehaviour
     {
-        private EventsProvider eventsProvider;
+        private IEventService _eventService;
         
         private List<Collider> _colliders = new();
 
@@ -18,7 +17,7 @@ namespace Tower.Components
 
         public void Init(int[][,] matrix)
         {
-            eventsProvider = ProjectContext.I.EventsProvider;
+            _eventService = ServiceLocator.Instance.Get<IEventService>();
             GenerateBoxColliders(matrix);
         }
 
@@ -29,7 +28,7 @@ namespace Tower.Components
                 if (Time.time - _lastGatePassTime > 0.5f)
                 {
                     _lastGatePassTime = Time.time;
-                    eventsProvider.OnGatePassed();
+                    _eventService.OnGatePassed();
                 }
             }
 
@@ -38,7 +37,7 @@ namespace Tower.Components
                 if (!_isFinished)
                 {
                     _isFinished = true;
-                    eventsProvider.OnFinishPassed();
+                    _eventService.OnFinishPassed();
                     
                 }
             }
@@ -54,7 +53,7 @@ namespace Tower.Components
                     Physics.IgnoreCollision(col, other.collider);
                 }
                 
-                eventsProvider.OnGateCollided();
+                _eventService.OnGateCollided();
             }
         }
 

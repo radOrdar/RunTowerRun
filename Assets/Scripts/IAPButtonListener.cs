@@ -1,7 +1,10 @@
 ﻿using System;
-using Core;
 using Cysharp.Threading.Tasks;
-using Infrastructure;
+using Services;
+using Services.Ads;
+using Services.Asset;
+using Services.Events;
+using Services.Save;
 using UnityEngine;
 using UnityEngine.Purchasing;
 using UnityEngine.Purchasing.Extension;
@@ -12,19 +15,19 @@ public class IAPButtonListener : MonoBehaviour
 
     #region Dependencies
 
-    private PersistentDataProvider _persistentDataProvider;
-    private EventsProvider _eventsProvider;
-    private AdsProvider _adsProvider;
-    private AssetProvider _assetProvider;
+    private IPersistentDataService _persistentDataService;
+    private IEventService _eventService;
+    private IAdsService _adsService;
+    private IAssetProvider _assetProvider;
 
     #endregion
 
     private void Start()
     {
-        _persistentDataProvider = ProjectContext.I.PersistentDataProvider;
-        _eventsProvider = ProjectContext.I.EventsProvider;
-        _adsProvider = ProjectContext.I.AdsProvider;
-        _assetProvider = ProjectContext.I.AssetProvider;
+        _persistentDataService = ServiceLocator.Instance.Get<IPersistentDataService>();
+        _eventService = ServiceLocator.Instance.Get<IEventService>();
+        _adsService = ServiceLocator.Instance.Get<IAdsService>();
+        _assetProvider = ServiceLocator.Instance.Get<IAssetProvider>();
     }
 
     public void OnPurchaseComplete(Product product)
@@ -38,9 +41,9 @@ public class IAPButtonListener : MonoBehaviour
 
         if (IsSubscribedTo(product, out DateTime datetime))
         {
-            _eventsProvider.OnAdsRemoved();
-            _adsProvider.RemoveAds();
-            _persistentDataProvider.SaveSubscriptionExpirationDate(datetime);
+            _eventService.OnAdsRemoved();
+            _adsService.RemoveAds();
+            _persistentDataService.SaveSubscriptionExpirationDate(datetime);
             ShowPopup(true);
         } else
         {

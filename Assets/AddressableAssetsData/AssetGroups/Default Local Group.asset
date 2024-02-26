@@ -67,6 +67,26 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8da1d06c48925bf43bc9d01b9dd0b3b2
+    m_Address: AppConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 707404cc9544b2942bd7613520b2c52b
+    m_Address: LevelProgression
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57168a6d52f6be54e8c5db608f7fcc25
+    m_Address: SoundData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 594ea2a1c400d4b4eb873b6156918756
+    m_Address: TowerConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 646180d8a5d2cb04c853646e2635b8c1, type: 2}
   m_SchemaSet:

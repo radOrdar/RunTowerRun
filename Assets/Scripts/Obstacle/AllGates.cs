@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Core;
 using Cysharp.Threading.Tasks;
-using Infrastructure;
+using Services;
+using Services.Asset;
 using UnityEngine;
 
 namespace Obstacle
@@ -13,7 +13,7 @@ namespace Obstacle
         private ParticleSystem _frameGhostTop;
         private ParticleSystem _frameGhostSide;
 
-        private AssetProvider _assetProvider;
+        private IAssetProvider _assetProvider;
 
         private List<int[,]> _gatePatterns;
 
@@ -21,23 +21,15 @@ namespace Obstacle
 
         public async UniTask Init(List<int[,]> gatePatterns, int distanceBtwObstacles)
         {
-            _assetProvider = ProjectContext.I.AssetProvider;
+            _assetProvider = ServiceLocator.Instance.Get<IAssetProvider>();
 
-            _obstaclePf = await _assetProvider.LoadAsync<ObstacleBlock>(Constants.Assets.OBSTACLE_BLOCK);
-            _frameObstaclePf = await _assetProvider.LoadAsync<ObstacleFrame>(Constants.Assets.OBSTACLE_FRAME);
-            _frameGhostTop = await _assetProvider.LoadAsync<ParticleSystem>(Constants.Assets.FRAME_GHOST_TOP);
-            _frameGhostSide = await _assetProvider.LoadAsync<ParticleSystem>(Constants.Assets.FRAME_GHOST_SIDE);
+            _obstaclePf = await _assetProvider.LoadComponentAsync<ObstacleBlock>(Constants.Assets.OBSTACLE_BLOCK);
+            _frameObstaclePf = await _assetProvider.LoadComponentAsync<ObstacleFrame>(Constants.Assets.OBSTACLE_FRAME);
+            _frameGhostTop = await _assetProvider.LoadComponentAsync<ParticleSystem>(Constants.Assets.FRAME_GHOST_TOP);
+            _frameGhostSide = await _assetProvider.LoadComponentAsync<ParticleSystem>(Constants.Assets.FRAME_GHOST_SIDE);
 
             _gatePatterns = gatePatterns;
             SpawnGates(gatePatterns, distanceBtwObstacles);
-        }
-
-        private void OnDestroy()
-        {
-            // _assetProvider.UnloadAsset(_obstaclePf.gameObject);
-            // _assetProvider.UnloadAsset(_frameObstaclePf.gameObject);
-            // _assetProvider.UnloadAsset(_frameGhostTop.gameObject);
-            // _assetProvider.UnloadAsset(_frameGhostSide.gameObject);
         }
 
         public bool TryGetNextGatePattern(out int[,] gatePattern)

@@ -1,5 +1,5 @@
-using Core;
-using Infrastructure;
+using Services;
+using Services.Audio;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,23 +11,23 @@ public class MuteButton : MonoBehaviour
     
     private Button _btn;
     private Image _img;
-    private AudioProvider _audioProvider;
+    private IAudioService _audioService;
 
     void Start()
     {
-        _audioProvider = ProjectContext.I.AudioProvider;
+        _audioService = ServiceLocator.Instance.Get<IAudioService>();
         
         _btn = GetComponent<Button>();
         _btn.onClick.AddListener(SwitchMute);
         
         _img = GetComponent<Image>();
-        _img.sprite = _audioProvider.Muted ? muteIcon : onIcon;
+        _img.sprite = _audioService.Muted ? muteIcon : onIcon;
     }
 
     private void SwitchMute()
     {
-        _audioProvider.Muted = !_audioProvider.Muted;
+        _audioService.Muted = !_audioService.Muted;
 
-        _img.sprite = _audioProvider.Muted ? muteIcon : onIcon;
+        _img.sprite = _audioService.Muted ? muteIcon : onIcon;
     }
 }

@@ -3,16 +3,19 @@ using System.Collections.Generic;
 
 namespace Services
 {
-    public class AllServices
+    public class ServiceLocator : IDisposable
     {
-        private static AllServices instance;
-        public static AllServices Instance => instance ??= new AllServices();
+        private static ServiceLocator instance;
+        public static ServiceLocator Instance => instance ??= new ServiceLocator();
         
         private readonly Dictionary<Type, IService> _container = new();
         
-        public TService Get<TService>() where TService : IService =>
-            (TService)_container[typeof(TService)];
-        
+        public TService Get<TService>() where TService : IService
+        {
+            _container.TryGetValue(typeof(TService), out IService value);
+            return (TService) value;
+        }
+
         public void Register<TService>(TService service) where TService : IService =>
             _container.Add(typeof(TService), service);
         

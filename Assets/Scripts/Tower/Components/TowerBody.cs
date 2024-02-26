@@ -1,19 +1,19 @@
-﻿using Core;
-using Cysharp.Threading.Tasks;
-using Infrastructure;
+﻿using Cysharp.Threading.Tasks;
+using Services;
+using Services.Asset;
 using UnityEngine;
 
 namespace Tower.Components
 {
     public class TowerBody : MonoBehaviour
     {
-        private AssetProvider _assetProvider;
+        private IAssetProvider _assetProvider;
 
         private TowerBlock _blockPf;
         public async UniTask Init(int[][,] matrix)
         {
-            _assetProvider = ProjectContext.I.AssetProvider;
-            _blockPf = await _assetProvider.LoadAsync<TowerBlock>(Constants.Assets.TOWER_BLOCK_PF);
+            _assetProvider = ServiceLocator.Instance.Get<IAssetProvider>();
+            _blockPf = await _assetProvider.LoadComponentAsync<TowerBlock>(Constants.Assets.TOWER_BLOCK_PF);
             
             for (int i = 0; i < matrix.Length; i++)
             {
@@ -30,11 +30,6 @@ namespace Tower.Components
                     }
                 }
             }
-        }
-
-        private void OnDestroy()
-        {
-            // _assetProvider.UnloadAsset(_blockPf.gameObject);
         }
     }
 }

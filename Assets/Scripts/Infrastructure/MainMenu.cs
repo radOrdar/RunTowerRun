@@ -1,6 +1,9 @@
 using System;
-using Core;
 using Core.Loading;
+using Services;
+using Services.Events;
+using Services.Save;
+using Services.ScreenLoading;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,28 +15,29 @@ namespace Infrastructure
         [SerializeField] private Button _newGameBtn;
         [SerializeField] private Button _removeAdsBtn;
 
-        private PersistentDataProvider _persistentData;
-        private EventsProvider _eventsProvider;
-        private LoadingScreenProvider _loadingScreenProvider;
+        private IPersistentDataService _persistentDataService;
+        private IEventService _eventService;
+        private ILoadingScreenProvider _loadingScreenProvider;
 
         private void Start()
         {
-            _persistentData = ProjectContext.I.PersistentDataProvider;
-            _eventsProvider = ProjectContext.I.EventsProvider;
-            _loadingScreenProvider = ProjectContext.I.LoadingScreenProvider;
+            ServiceLocator serviceLocator = ServiceLocator.Instance;
+            _persistentDataService = serviceLocator.Get<IPersistentDataService>();
+            _eventService = serviceLocator.Get<IEventService>();
+            _loadingScreenProvider = serviceLocator.Get<ILoadingScreenProvider>();
 
             _continueBtn.onClick.AddListener(OnContinueBtnClicked);
             _newGameBtn.onClick.AddListener(OnNewGameBtnClicked);
 
-            bool notSubscriber = !_persistentData.TryGetSubscriptionExpirationDate(out DateTime expirationDateTime) || expirationDateTime.CompareTo(DateTime.Now) < 0;
+            bool notSubscriber = !_persistentDataService.TryGetSubscriptionExpirationDate(out DateTime expirationDateTime) || expirationDateTime.CompareTo(DateTime.Now) < 0;
             _removeAdsBtn.gameObject.SetActive(notSubscriber);
 
-            _eventsProvider.AdsRemoved += OnAdsRemoved;
+            _eventService.AdsRemoved += OnAdsRemoved;
         }
 
         private void OnDestroy()
         {
-            _eventsProvider.AdsRemoved -= OnAdsRemoved;
+            _eventService.AdsRemoved -= OnAdsRemoved;
         }
 
         private void OnAdsRemoved()
@@ -52,7 +56,7 @@ namespace Infrastructure
         {
             DisableButtons();
         
-            _persistentData.ResetProgress();
+            _persistentDataService.ResetProgress();
 
             _loadingScreenProvider.LoadAndDestroy(new GameLoadingOperation());
         }

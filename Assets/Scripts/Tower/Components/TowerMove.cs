@@ -1,9 +1,10 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using Core;
-using Infrastructure;
+using Cysharp.Threading.Tasks;
 using Obstacle;
+using Services;
+using Services.Events;
+using Services.StaticData;
 using StaticData;
 using UnityEngine;
 using Utils;
@@ -25,7 +26,8 @@ namespace Tower.Components
 
         #region Dependencies
 
-        private EventsProvider _eventsProvider;
+        private IEventService _eventService;
+        private IStaticDataService _staticDataService;
         private AllGates _allGates;
 
         #endregion
@@ -36,15 +38,16 @@ namespace Tower.Components
         private float _currentSpeed;
         private float _currentAcceleration;
         private bool _slowedDown;
-        private bool _stopped;
+        private bool _active;
 
         #endregion
 
-        public void Init(Dictionary<Vector3, int[,]> towerProjections, ProgressionUnit progressionUnit)
+        public async UniTask Init(Dictionary<Vector3, int[,]> towerProjections, ProgressionUnit progressionUnit)
         {
-            _eventsProvider = ProjectContext.I.EventsProvider;
-            _towerConfig = ProjectContext.I.StaticDataProvider.TowerConfigurationData;
+            _eventService = ServiceLocator.Instance.Get<IEventService>();
+            _staticDataService = ServiceLocator.Instance.Get<IStaticDataService>();
             _allGates = FindAnyObjectByType<AllGates>();
+            _towerConfig = await _staticDataService.GetData<TowerConfigurationData>();
 
             _moveSpeed = progressionUnit.normalSpeed;
             _hasteMoveSpeed = progressionUnit.hasteSpeed;
@@ -53,49 +56,38 @@ namespace Tower.Components
             _targetSpeed = _moveSpeed;
             _currentAcceleration = _towerConfig.acceleration;
             
-            _eventsProvider.GateCollided += BounceBack;
-            _eventsProvider.FinishPassed += Stop;
-        }
-
-        private void Start()
-        {
-            StartCoroutine(CheckGateForm());
+            _eventService.GateCollided += BounceBack;
+            _eventService.FinishPassed += Stop;
+            
+            _active = true;
         }
 
         private void OnDestroy()
         {
-            _eventsProvider.GateCollided -= BounceBack;
-            _eventsProvider.FinishPassed -= Stop;
+            _eventService.GateCollided -= BounceBack;
+            _eventService.FinishPassed -= Stop;
         }
 
         void Update()
         {
             _currentSpeed = Mathf.MoveTowards(_currentSpeed, _targetSpeed, _currentAcceleration * Time.deltaTime);
             transform.position += Vector3.forward * (_currentSpeed * Time.deltaTime);
-        }
-
-        private IEnumerator CheckGateForm()
-        {
-            while (true)
+            
+            if (_active == false)
+                return;
+            if (!_slowedDown)
             {
-                if (_stopped)
-                    break;
-                if (!_slowedDown)
+                if (_towerProjections.TryGetValue(bodyTransform.forward, out int[,] proj) &&
+                    _allGates.TryGetNextGatePattern(out int[,] gatePattern) &&
+                    EqualityCheck(proj, gatePattern))
                 {
-                    if (_towerProjections.TryGetValue(bodyTransform.forward, out int[,] proj) &&
-                        _allGates.TryGetNextGatePattern(out int[,] gatePattern) &&
-                        EqualityCheck(proj, gatePattern))
-                    {
-                        _targetSpeed = _hasteMoveSpeed;
-                        _eventsProvider.OnHasteSwitch(true);
-                    } else
-                    {
-                        _targetSpeed = _moveSpeed;
-                        _eventsProvider.OnHasteSwitch(false);
-                    }
+                    _targetSpeed = _hasteMoveSpeed;
+                    _eventService.OnHasteSwitch(true);
+                } else
+                {
+                    _targetSpeed = _moveSpeed;
+                    _eventService.OnHasteSwitch(false);
                 }
-
-                yield return WaitForSecondsPool.Get(0.1f);
             }
         }
 
@@ -130,7 +122,7 @@ namespace Tower.Components
         {
             _currentAcceleration = _towerConfig.bounceAcceleration;
             _slowedDown = true;
-            _eventsProvider.OnHasteSwitch(false);
+            _eventService.OnHasteSwitch(false);
             yield return WaitForSecondsPool.Get(_towerConfig.bounceAccelerationDelay);
             _currentAcceleration = _towerConfig.acceleration;
             _slowedDown = false;
@@ -138,7 +130,7 @@ namespace Tower.Components
 
         private void Stop()
         {
-            _stopped = true;
+            _active = false;
             _targetSpeed = 0;
             _currentAcceleration = _towerConfig.finishAcceleration;
         }

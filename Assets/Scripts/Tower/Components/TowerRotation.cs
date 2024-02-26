@@ -1,6 +1,8 @@
-﻿using System;
-using Core;
-using Infrastructure;
+﻿using Cysharp.Threading.Tasks;
+using Services;
+using Services.Events;
+using Services.Input;
+using Services.StaticData;
 using StaticData;
 using UnityEngine;
 
@@ -14,8 +16,8 @@ namespace Tower.Components
 
         #region Dependencies
 
-        private InputProvider _inputProvider;
-        private EventsProvider _eventsProvider;
+        private IInputService _inputService;
+        private IEventService _eventService;
         private Camera _mainCamera;
 
         #endregion
@@ -25,30 +27,35 @@ namespace Tower.Components
         private int currDirIndex;
         private Vector3 _prevMousePos;
         private Quaternion _targetRotation;
-        private bool _stopped;
+        private bool _active;
 
         #endregion
-        
+
         private Vector3[] _directions = { Vector3.forward, Vector3.right, Vector3.back, Vector3.left };
 
-        private void Start()
+        public async UniTask Init()
         {
-            _inputProvider = ProjectContext.I.InputProvider;
-            _eventsProvider = ProjectContext.I.EventsProvider;
-            _towerConfig = ProjectContext.I.StaticDataProvider.TowerConfigurationData;
+            ServiceLocator serviceLocator = ServiceLocator.Instance;
+            _inputService = serviceLocator.Get<IInputService>();
+            _eventService = serviceLocator.Get<IEventService>();
             _mainCamera = Camera.main;
+            _eventService.FinishPassed += Stop;
+            _towerConfig = await serviceLocator.Get<IStaticDataService>().GetData<TowerConfigurationData>();
 
-            _eventsProvider.FinishPassed += Stop;
+            _active = true;
         }
 
         private void OnDestroy()
         {
-            _eventsProvider.FinishPassed -= Stop;
+            if (_eventService != null)
+            {
+                _eventService.FinishPassed -= Stop;
+            }
         }
 
         private void Update()
         {
-            if (_stopped)
+            if (_active == false)
                 return;
 
             if (_towerConfig.rotationControlType == RotationControlType.Manual)
@@ -62,9 +69,9 @@ namespace Tower.Components
 
         private void AutoRotation()
         {
-            if (_inputProvider.GetMouseButtonDown(0))
+            if (_inputService.GetMouseButtonDown(0))
             {
-                Vector3 tapViewportCoord = _mainCamera.ScreenToViewportPoint(_inputProvider.MousePosition);
+                Vector3 tapViewportCoord = _mainCamera.ScreenToViewportPoint(_inputService.MousePosition);
                 if (tapViewportCoord.x > 0.5f)
                 {
                     currDirIndex++;
@@ -91,14 +98,14 @@ namespace Tower.Components
 
         private void ManualRotation()
         {
-            if (_inputProvider.GetMouseButtonDown(0))
+            if (_inputService.GetMouseButtonDown(0))
             {
-                _prevMousePos = _inputProvider.MousePosition;
+                _prevMousePos = _inputService.MousePosition;
             }
 
-            if (_inputProvider.GetMouseButton(0))
+            if (_inputService.GetMouseButton(0))
             {
-                Vector3 mousePosition = _inputProvider.MousePosition;
+                Vector3 mousePosition = _inputService.MousePosition;
                 bodyTransform.Rotate(Vector3.up, (mousePosition - _prevMousePos).x * _towerConfig.manualRotationSpeed, Space.World);
                 _prevMousePos = mousePosition;
             } else
@@ -106,7 +113,7 @@ namespace Tower.Components
                 bodyTransform.rotation = Quaternion.RotateTowards(bodyTransform.rotation, _targetRotation, _towerConfig.autoRotateSpeed * Time.deltaTime);
             }
 
-            if (_inputProvider.GetMouseButtonUp(0))
+            if (_inputService.GetMouseButtonUp(0))
             {
                 Vector3 currentDir = bodyTransform.forward;
                 Vector3 max = _directions[0];
@@ -127,7 +134,7 @@ namespace Tower.Components
 
         private void Stop()
         {
-            _stopped = true;
+            _active = false;
         }
     }
 }

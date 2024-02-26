@@ -5,6 +5,14 @@ using Core;
 using Core.Loading;
 using Cysharp.Threading.Tasks;
 using Obstacle;
+using Services;
+using Services.Ads;
+using Services.Asset;
+using Services.Audio;
+using Services.Events;
+using Services.Save;
+using Services.ScreenLoading;
+using Services.StaticData;
 using StaticData;
 using TMPro;
 using Tower;
@@ -18,61 +26,67 @@ namespace Infrastructure
 {
     public class LevelController : MonoBehaviour
     {
-        [SerializeField] private LevelProgressionData levelProgressionData;
         [SerializeField] private TextMeshProUGUI levelText;
         [SerializeField] private Button nextLevelBtn;
 
-        private AudioProvider _audioProvider;
-        private EventsProvider _eventsProvider;
-        private AdsProvider _adsProvider;
-        private PersistentDataProvider _persistentData;
-        private LoadingScreenProvider _loadingScreenProvider;
-        private AssetProvider _assetProvider;
+        private IAudioService _audioService;
+        private IEventService _eventService;
+        private IAdsService _adsService;
+        private IPersistentDataService _persistentData;
+        private ILoadingScreenProvider _loadingScreenProvider;
+        private IAssetProvider _assetProvider;
 
+        private LevelProgressionData _levelProgressionData;
         private Finish _finish;
+        private IStaticDataService _staticDataService;
 
         private async void Awake()
         {
-            _audioProvider = ProjectContext.I.AudioProvider;
-            _eventsProvider = ProjectContext.I.EventsProvider;
-            _adsProvider = ProjectContext.I.AdsProvider;
-            _persistentData = ProjectContext.I.PersistentDataProvider;
-            _loadingScreenProvider = ProjectContext.I.LoadingScreenProvider;
-            _assetProvider = ProjectContext.I.AssetProvider;
+            var serviceLocator = ServiceLocator.Instance;
+            _audioService = serviceLocator.Get<IAudioService>();
+            _eventService = serviceLocator.Get<IEventService>();
+            _adsService = serviceLocator.Get<IAdsService>();
+            _persistentData = serviceLocator.Get<IPersistentDataService>();
+            _loadingScreenProvider = serviceLocator.Get<ILoadingScreenProvider>();
+            _assetProvider = serviceLocator.Get<IAssetProvider>();
+            _staticDataService = serviceLocator.Get<IStaticDataService>();
 
             if (!_persistentData.TryGetSubscriptionExpirationDate(out DateTime expirationDateTime) || expirationDateTime.CompareTo(DateTime.Now) < 0)
             {
-                _adsProvider.Initialize();
-                _adsProvider.ShowBanner();
+                _adsService.Initialize();
+                _adsService.ShowBanner();
             }
 
-            _audioProvider.PlayMusic();
+            _audioService.PlayMusic();
 
-            int currentLevel = ProjectContext.I.PersistentDataProvider.GetLevel();
+            int currentLevel = _persistentData.GetLevel();
             levelText.SetText($"Level {currentLevel + 1}");
             nextLevelBtn.onClick.AddListener(NextLevel);
 
-            ProgressionUnit progressionUnit = levelProgressionData.GetProgression(currentLevel);
+            _levelProgressionData = await _staticDataService.GetData<LevelProgressionData>();
+            ProgressionUnit progressionUnit = _levelProgressionData.GetProgression(currentLevel);
             TowerPattern towerPattern = new TowerGenerator().GeneratePattern(progressionUnit);
-            FindAnyObjectByType<TowerMove>().Init(towerPattern.towerProjections, progressionUnit);
-            FindAnyObjectByType<TowerBody>().Init(towerPattern.matrix);
+            await FindAnyObjectByType<TowerMove>().Init(towerPattern.towerProjections, progressionUnit);
+            await FindAnyObjectByType<TowerBody>().Init(towerPattern.matrix);
+            await FindAnyObjectByType<TowerScore>().Init();
+            await FindAnyObjectByType<TowerRotation>().Init();
             FindAnyObjectByType<TowerEffects>().Init(progressionUnit);
             FindAnyObjectByType<TowerCollision>().Init(towerPattern.matrix);
-            _eventsProvider.GateCollided += OnGateCollided;
-            _eventsProvider.GatePassed += OnGatePassed;
-            _eventsProvider.FinishPassed += OnFinishPassed;
+            _eventService.GateCollided += OnGateCollided;
+            _eventService.GatePassed += OnGatePassed;
+            _eventService.FinishPassed += OnFinishPassed;
 
             List<int[,]> gatePatterns = Enumerable.Range(0, progressionUnit.numOfGates).Select(_ => towerPattern.towerProjections[RandomDirection()]).ToList();
-            FindAnyObjectByType<AllGates>().Init(gatePatterns, progressionUnit.distanceBtwGates);
+            await FindAnyObjectByType<AllGates>().Init(gatePatterns, progressionUnit.distanceBtwGates);
 
-            _finish = await _assetProvider.InstantiateAsync<Finish>(Constants.Assets.FINISHLINE, new Vector3(0, 0.1f, progressionUnit.numOfGates * progressionUnit.distanceBtwGates + 40), Quaternion.identity);
+            _finish = await _assetProvider.InstantiateAsync<Finish>(Constants.Assets.FINISH_LINE, new Vector3(0, 0.1f, progressionUnit.numOfGates * progressionUnit.distanceBtwGates + 40), Quaternion.identity);
         }
 
         private void OnDestroy()
         {
-            _eventsProvider.GateCollided -= OnGateCollided;
-            _eventsProvider.GatePassed -= OnGatePassed;
-            _eventsProvider.FinishPassed -= OnFinishPassed;
+            _eventService.GateCollided -= OnGateCollided;
+            _eventService.GatePassed -= OnGatePassed;
+            _eventService.FinishPassed -= OnFinishPassed;
 
             if (_finish != null)
             {
@@ -87,20 +101,20 @@ namespace Infrastructure
 
         private void OnGatePassed()
         {
-            _audioProvider.PlayDing();
+            _audioService.PlayDing();
         }
 
         private void OnGateCollided()
         {
-            _audioProvider.PlayBump();
+            _audioService.PlayBump();
         }
 
         private async void OnFinishPassed()
         {
-            _audioProvider.PlayFinish();
+            _audioService.PlayFinish();
             _persistentData.SaveLevel(_persistentData.GetLevel() + 1);
             await UniTask.Delay(3000);
-            _adsProvider.ShowInterstitial();
+            _adsService.ShowInterstitial();
             await UniTask.Delay(2000);
             nextLevelBtn.gameObject.SetActive(true);
         }

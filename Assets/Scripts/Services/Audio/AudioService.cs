@@ -1,12 +1,11 @@
 ﻿using StaticData;
 using UnityEngine;
 
-namespace Core
+namespace Services.Audio
 {
-    [RequireComponent(typeof(AudioSource))]
-    public class AudioProvider : MonoBehaviour
+    public class AudioService : IAudioService
     {
-        [SerializeField] private SoundsData _soundsData;
+        private SoundsData _soundsData;
         private AudioSource _audioSource;
         
         public bool Muted
@@ -14,11 +13,13 @@ namespace Core
             get => _audioSource.mute;
             set => _audioSource.mute = value;
         }
-        
-        private void Awake()
+
+        public AudioService(SoundsData soundsData)
         {
-            _audioSource = GetComponent<AudioSource>();
+            _soundsData = soundsData;
+            _audioSource = new GameObject("AudioSource").AddComponent<AudioSource>();
             _audioSource.loop = true;
+            Object.DontDestroyOnLoad(_audioSource);
         }
 
         public void PlayMusic()
