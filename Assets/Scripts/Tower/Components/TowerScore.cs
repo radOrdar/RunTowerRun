@@ -1,13 +1,12 @@
 ﻿using System.Collections;
 using Cysharp.Threading.Tasks;
 using Services;
-using Services.Asset;
 using Services.Events;
+using Services.Factory;
 using Services.StaticData;
 using StaticData;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Pool;
 using Utils;
 
 namespace Tower.Components
@@ -23,7 +22,7 @@ namespace Tower.Components
         #region Dependencies
 
         private IEventService _eventService;
-        private IAssetProvider _assetProvider;
+        private IGameFactory _gameFactory;
         private IStaticDataService _staticDataService;
 
         #endregion
@@ -50,13 +49,13 @@ namespace Tower.Components
         #endregion
 
         private ScoreGainFx _gainFxPf;
-        private IObjectPool<ScoreGainFx> _poolScoreGainFx;
+        // private IObjectPool<ScoreGainFx> _poolScoreGainFx;
 
         public async UniTask Init()
         {
             ServiceLocator serviceLocator = ServiceLocator.Instance;
             _eventService = serviceLocator.Get<IEventService>();
-            _assetProvider = serviceLocator.Get<IAssetProvider>();
+            _gameFactory = serviceLocator.Get<IGameFactory>();
             _staticDataService = serviceLocator.Get<IStaticDataService>();
 
             _eventService.GatePassed += StreakIncrease;
@@ -65,20 +64,20 @@ namespace Tower.Components
             _eventService.HasteSwitch += SetActiveGaining;
             Streak = 1;
 
-            _gainFxPf = await _assetProvider.LoadComponentAsync<ScoreGainFx>(Constants.Assets.SCORE_GAIN_FX_PF);
-            _poolScoreGainFx = new ObjectPool<ScoreGainFx>(
-                createFunc: () =>
-                {
-                    var s = Instantiate(_gainFxPf, transform);
-                    s.Origin = _poolScoreGainFx;
-                    return s;
-                },
-                actionOnGet: s =>
-                {
-                    s.gameObject.SetActive(true);
-                },
-                actionOnRelease: g => g.gameObject.SetActive(false)
-            );
+            // _gainFxPf = await _gameFactory.LoadComponentAsync<ScoreGainFx>(Constants.Assets.SCORE_GAIN_FX_PF);
+            // _poolScoreGainFx = new ObjectPool<ScoreGainFx>(
+            //     createFunc: () =>
+            //     {
+            //         var s = Instantiate(_gainFxPf, transform);
+            //         s.Origin = _poolScoreGainFx;
+            //         return s;
+            //     },
+            //     actionOnGet: s =>
+            //     {
+            //         s.gameObject.SetActive(true);
+            //     },
+            //     actionOnRelease: g => g.gameObject.SetActive(false)
+            // );
             _towerConfig = await _staticDataService.GetData<TowerConfigurationData>();
             StartCoroutine(ScoreTick());
         }
@@ -104,7 +103,8 @@ namespace Tower.Components
             _gaining = false;
             _score += 300;
             scoreText.SetText(_score.ToString());
-            _poolScoreGainFx.Get().SetValue(300);
+            _gameFactory.GetScoreGainFxAsync(transform, 300);
+            // _poolScoreGainFx.Get().SetValue(300);
         }
 
         private void ResetStreak()
@@ -121,7 +121,7 @@ namespace Tower.Components
             if (Time.time - _lastStreakChangeTime < 0.5f)
                 return;
             Streak++;
-            _poolScoreGainFx.Get().SetValue(_streak * 10);
+           _gameFactory.GetScoreGainFxAsync(transform, _streak * 10);
             _score += _streak * 10;
             scoreText.SetText(_score.ToString());
             _lastStreakChangeTime = Time.time;
@@ -135,7 +135,7 @@ namespace Tower.Components
                 {
                     _score += Streak;
                     scoreText.SetText(_score.ToString());
-                    _poolScoreGainFx.Get().SetValue(_streak);
+                    _gameFactory.GetScoreGainFxAsync(transform, _streak);
                 }
 
                 yield return WaitForSecondsPool.Get(_towerConfig.scoreTickPeriod);

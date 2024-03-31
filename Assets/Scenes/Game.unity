@@ -97,9 +97,10 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000000, guid: 21785301401ba474a8c579b2f5f61e5d,
+  m_LightingDataAsset: {fileID: 112000000, guid: 27db36d7332fbb64a939d23d97a5680e,
     type: 2}
-  m_LightingSettings: {fileID: 0}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 0b8d80a8a03259947bc9208101fb6f4f,
+    type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -871,6 +872,7 @@ GameObject:
   - component: {fileID: 330585545}
   - component: {fileID: 330585547}
   - component: {fileID: 330585548}
+  - component: {fileID: 330585549}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -914,10 +916,10 @@ Camera:
   field of view: 100
   orthographic: 0
   orthographic size: 5
-  m_Depth: -1
+  m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 2007
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1005,6 +1007,14 @@ MonoBehaviour:
   finishFov: 125
   fovSpeed: 2
   rotationSpeed: 10
+--- !u!81 &330585549
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
 --- !u!1 &337414094
 GameObject:
   m_ObjectHideFlags: 0
@@ -1666,11 +1676,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bodyTransform: {fileID: 1599391049}
-  bounceBackSpeed: 3
-  acceleration: 15
-  bounceAcceleration: 4.5
-  finishAcceleration: 100
-  bounceAccelerationDelay: 1.5
 --- !u!4 &461060804
 Transform:
   m_ObjectHideFlags: 0
@@ -1701,8 +1706,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   towerSpeedFx: {fileID: 2074925590}
-  fireWorkPf: {fileID: 5720295142866211942, guid: 9d79e244f4e9e7446959cacf30c2d19d,
-    type: 3}
 --- !u!114 &461060809
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1715,8 +1718,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93b5c2fc7c424c6fb37da8a0b25821ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tickPeriod: 0.2
-  gainFx: {fileID: 790569100355211167, guid: 8f678b15c8e24b8409e91c1c4c7a10e2, type: 3}
   streakFx: {fileID: 342828790}
   scoreText: {fileID: 337414096}
 --- !u!114 &461060810
@@ -1732,9 +1733,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bodyTransform: {fileID: 1599391049}
-  manualRotationSpeed: 1
-  autoRotateSpeed: 360
-  rotationControlType: 0
 --- !u!1 &512428661
 GameObject:
   m_ObjectHideFlags: 0
@@ -2769,10 +2767,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68dac41739a431f872136b5c7929b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelProgressionData: {fileID: 11400000, guid: 707404cc9544b2942bd7613520b2c52b,
-    type: 2}
-  finishPf: {fileID: 2640195575909246685, guid: f8039d79320054b419de1f08f8708a5d,
-    type: 3}
   levelText: {fileID: 1038217848}
   nextLevelBtn: {fileID: 1802365452}
 --- !u!4 &1352450191
@@ -3163,7 +3157,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bb7b057a0d945068e34b9d2660d0a28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockPf: {fileID: 3798275367899508046, guid: 68909ffb5df163249ae6c74a6752ef81, type: 3}
 --- !u!54 &1599391052
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3316,14 +3309,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab14d802442e4ae1978a25cb537280b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  obstaclePf: {fileID: 6010459574702017839, guid: b367644fc68959843a474e53532fce03,
-    type: 3}
-  frameObstaclePf: {fileID: 5475004496177685405, guid: f63281d38260a744c9f7a38438297aff,
-    type: 3}
-  frameFxTop: {fileID: 165280353024029653, guid: eca5ed48f9b01394489a3d7efa471a0e,
-    type: 3}
-  frameFxSide: {fileID: 7508645246578429203, guid: c271587fa6d70b742a2ac03d1a03c721,
-    type: 3}
 --- !u!4 &1742257078
 Transform:
   m_ObjectHideFlags: 0

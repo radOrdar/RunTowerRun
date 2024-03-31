@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 0dc63bf0935117a488e7c6c31808b4d4
+  m_SerializeEntries:
+  - m_GUID: 55280f0d49a7d5b4b9d04630633840bc
+    m_Address: LoadingScreen
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f8039d79320054b419de1f08f8708a5d
+    m_Address: FinishLine
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b367644fc68959843a474e53532fce03
+    m_Address: ObstacleBlock
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f63281d38260a744c9f7a38438297aff
+    m_Address: ObstacleFrame
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eca5ed48f9b01394489a3d7efa471a0e
+    m_Address: FrameGhost
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 68909ffb5df163249ae6c74a6752ef81
+    m_Address: TowerBlockPf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9d79e244f4e9e7446959cacf30c2d19d
+    m_Address: Firework
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f678b15c8e24b8409e91c1c4c7a10e2
+    m_Address: ScoreGainFxPf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9761d29019ed7eb4584e5a1034dc8889
+    m_Address: UIPopup
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8da1d06c48925bf43bc9d01b9dd0b3b2
+    m_Address: AppConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 707404cc9544b2942bd7613520b2c52b
+    m_Address: LevelProgression
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57168a6d52f6be54e8c5db608f7fcc25
+    m_Address: SoundData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 594ea2a1c400d4b4eb873b6156918756
+    m_Address: TowerConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 646180d8a5d2cb04c853646e2635b8c1, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 29ebc7e6aa3a09647bfecaef76045dad, type: 2}
+    - {fileID: 11400000, guid: b04227d3ed4e113479305edc294a4cad, type: 2}

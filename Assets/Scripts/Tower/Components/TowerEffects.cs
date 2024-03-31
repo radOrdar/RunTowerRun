@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Services;
-using Services.Asset;
 using Services.Events;
+using Services.Factory;
 using StaticData;
 using UnityEngine;
 
@@ -13,15 +13,15 @@ namespace Tower.Components
         [SerializeField] private ParticleSystem towerSpeedFx;
 
         private IEventService _eventService;
-        private IAssetProvider _assetProvider;
+        private IGameFactory _gameFactory;
 
-        private ParticleSystem _fireWork;
+        // private ParticleSystem _fireWork;
         private int _towerHeight;
 
         public void Init(ProgressionUnit progressionUnit)
         {
             _eventService = ServiceLocator.Instance.Get<IEventService>();
-            _assetProvider = ServiceLocator.Instance.Get<IAssetProvider>();
+            _gameFactory = ServiceLocator.Instance.Get<IGameFactory>();
             _eventService.HasteSwitch += SetEnabledSpeedFx;
             _eventService.FinishPassed += OnFinishPassed;
 
@@ -39,10 +39,10 @@ namespace Tower.Components
                 _eventService.FinishPassed -= OnFinishPassed;
             }
 
-            if (_fireWork != null)
-            {
-                _assetProvider.UnloadInstance(_fireWork.gameObject);
-            }
+            // if (_fireWork != null)
+            // {
+            //     // _assetProvider.UnloadInstance(_fireWork.gameObject);
+            // }
         }
 
         public void SetEnabledSpeedFx(bool enable)
@@ -60,9 +60,10 @@ namespace Tower.Components
         {
             SetEnabledSpeedFx(false);
             await UniTask.Delay(200);
-            _fireWork = await _assetProvider.InstantiateAsync<ParticleSystem>(Constants.Assets.FIREWORK, transform);
-            _fireWork.transform.localPosition = Vector3.up * _towerHeight;
-            _fireWork.transform.localRotation = Quaternion.Euler(-90, 0, 0);
+            _gameFactory.GetFireworkAsync(Vector3.up * _towerHeight, Quaternion.Euler(-90, 0, 0), transform);
+            // _fireWork = await _assetProvider.InstantiateAsync<ParticleSystem>(Constants.Assets.FIREWORK, transform);
+            // _fireWork.transform.localPosition = Vector3.up * _towerHeight;
+            // _fireWork.transform.localRotation = Quaternion.Euler(-90, 0, 0);
         }
     }
 }

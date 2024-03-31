@@ -1,5 +1,4 @@
-﻿using System;
-using AppodealStack.Monetization.Api;
+﻿using AppodealStack.Monetization.Api;
 using AppodealStack.Monetization.Common;
 using StaticData;
 using UnityEngine;
@@ -27,9 +26,9 @@ namespace Services.Ads
         
             AppodealCallbacks.Sdk.OnInitialized += OnAppodealInitalized;
         
-            AppodealCallbacks.Interstitial.OnLoaded += OnInterstitialLoaded;
-            AppodealCallbacks.Interstitial.OnFailedToLoad += OnInterstitialFailedToLoad;
-            AppodealCallbacks.Interstitial.OnShown += OnInterstitialShown;
+            // AppodealCallbacks.Interstitial.OnLoaded += OnInterstitialLoaded;
+            // AppodealCallbacks.Interstitial.OnFailedToLoad += OnInterstitialFailedToLoad;
+            // AppodealCallbacks.Interstitial.OnShown += OnInterstitialShown;
         
             Appodeal.Initialize(_appData.appodealAppKey, adTypes);
         }
@@ -63,26 +62,28 @@ namespace Services.Ads
         {
             Appodeal.Hide(AppodealAdType.Banner);
         }
-
-        private void OnInterstitialShown(object sender, EventArgs e)
-        {
-            Debug.Log("Interstitial shown");
-        }
-
-        private void OnInterstitialFailedToLoad(object sender, EventArgs e)
-        {
-            Debug.Log("Interstitial failed to load");
-        }
-
-        private void OnInterstitialLoaded(object sender, AdLoadedEventArgs e)
-        {
-            Debug.Log("Interstitial Loaded");
-        }
-
+        
         private void OnAppodealInitalized(object sender, SdkInitializedEventArgs e)
         {
             _active = true;
             Debug.Log("Appodeal Initialized");
         }
+
+        // private void OnInterstitialShown(object sender, EventArgs e)
+        // {
+        //     Debug.Log("Interstitial shown");
+        // }
+        //
+        // private void OnInterstitialFailedToLoad(object sender, EventArgs e)
+        // {
+        //     Debug.Log("Interstitial failed to load");
+        // }
+        //
+        // private void OnInterstitialLoaded(object sender, AdLoadedEventArgs e)
+        // {
+        //     Debug.Log("Interstitial Loaded");
+        // }
+
+       
     }
 }

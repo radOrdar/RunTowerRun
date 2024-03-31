@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using Core.Loading;
 using Cysharp.Threading.Tasks;
-using Services.Asset;
+using Services.Factory;
 
 namespace Services.ScreenLoading
 {
     public class LoadingScreenProvider : ILoadingScreenProvider
     {
-        private IAssetProvider _assetProvider;
+        private IGameFactory _gameFactory;
 
-        public LoadingScreenProvider(IAssetProvider assetProvider) => 
-            _assetProvider = assetProvider;
+        public LoadingScreenProvider(IGameFactory gameFactory) => 
+            _gameFactory = gameFactory;
 
         public async UniTask LoadAndDestroy(ILoadingOperation loadingOperation)
         {
@@ -21,10 +21,10 @@ namespace Services.ScreenLoading
 
         public async UniTask LoadAndDestroy(Queue<ILoadingOperation> loadingOperations)
         {
-            LoadingScreen loadingScreen = await _assetProvider.InstantiateAsync<LoadingScreen>(Constants.Assets.LOADING_SCREEN);
-            
+            // LoadingScreen loadingScreen = await _gameFactory.InstantiateAsync<LoadingScreen>(Constants.Assets.LOADING_SCREEN);
+            LoadingScreen loadingScreen = await _gameFactory.GetLoadingScreenAsync();
             await loadingScreen.Load(loadingOperations);
-            _assetProvider.UnloadInstance(loadingScreen.gameObject);
+            _gameFactory.ReleaseInstance(loadingScreen);
         }
     }
 }

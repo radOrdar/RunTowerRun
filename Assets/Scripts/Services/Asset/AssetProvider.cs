@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
 namespace Services.Asset
@@ -11,7 +12,7 @@ namespace Services.Asset
     {
         private bool _isReady;
 
-        private Dictionary<string, Object> _cachedLoaded = new();
+        private Dictionary<string, AsyncOperationHandle<Object>> _cachedLoading = new();
         private HashSet<GameObject> _cachedInstantiated = new();
 
         public async UniTask<T> InstantiateAsync<T>(string assetId, Transform parent = null) =>
@@ -34,16 +35,18 @@ namespace Services.Asset
 
             return component;
         }
-
+        
         public async UniTask<Object> LoadAssetAsync(string assetId)
         {
-            if (_cachedLoaded.TryGetValue(assetId, out Object asset) == false)
+            if (_cachedLoading.TryGetValue(assetId, out AsyncOperationHandle<Object> handle) == false)
             {
-                asset = await Addressables.LoadAssetAsync<Object>(assetId);
-                _cachedLoaded.Add(assetId, asset);
+                handle = Addressables.LoadAssetAsync<Object>(assetId);
+                
+                // handle = await Addressables.LoadAssetAsync<Object>(assetId);
+                _cachedLoading.Add(assetId, handle);
             }
         
-            return asset;
+            return await handle;
         }
 
         public async UniTask<GameObject> LoadGameObjectAsync(string assetId) => 
@@ -54,7 +57,7 @@ namespace Services.Asset
             GameObject asset = await LoadGameObjectAsync(assetId);
             if (asset.TryGetComponent(out T component) == false)
             {
-                UnloadAsset(asset);
+                ReleaseAsset(assetId);
                 throw new NullReferenceException($"Object of type {typeof(T)} is null on " +
                                                "attempt to load it from addressables");
             }
@@ -62,54 +65,32 @@ namespace Services.Asset
             return component;
         }
 
-        // public async UniTask<T> LoadAsync<T>(string assetId)
-        // {
-        //     bool notCached = false;
-        //     if (_cachedLoaded.TryGetValue(assetId, out GameObject asset) == false)
-        //     {
-        //         asset = await Addressables.LoadAssetAsync<GameObject>(assetId);
-        //         notCached = true;
-        //     }
-        //
-        //     if (asset.TryGetComponent(out T component))
-        //     {
-        //         if (notCached)
-        //         {
-        //             _cachedLoaded[assetId] = asset;
-        //         }
-        //     } else
-        //     {
-        //         if (notCached)
-        //         {
-        //             Addressables.Release(asset);
-        //         }
-        //
-        //         throw new NullReferenceException($"Object of type {typeof(T)} is null on " +
-        //                                          "attempt to load it from addressables");
-        //     }
-        //
-        //     return component;
-        // }
-
-        public void UnloadAsset(Object asset)
+        public void ReleaseAsset(string assetPath)
         {
-            string matchedKey = null;
-            foreach (string key in _cachedLoaded.Keys)
+            if (_cachedLoading.TryGetValue(assetPath, out AsyncOperationHandle<Object> handle))
             {
-                if (_cachedLoaded[key] == asset)
-                {
-                    matchedKey = key;
-                }
+                _cachedLoading.Remove(assetPath);
+                Addressables.Release(handle);
             }
-
-            if (matchedKey != null)
-            {
-                _cachedLoaded.Remove(matchedKey);
-                Addressables.Release(asset);
-            }
+            
+            
+            // string matchedKey = null;
+            // foreach (string key in _cachedLoading.Keys)
+            // {
+            //     if (_cachedLoading[key] == assetPath)
+            //     {
+            //         matchedKey = key;
+            //     }
+            // }
+            //
+            // if (matchedKey != null)
+            // {
+            //     _cachedLoading.Remove(matchedKey);
+            //     Addressables.Release(assetPath);
+            // }
         }
 
-        public void UnloadInstance(GameObject instance)
+        public void ReleaseInstance(GameObject instance)
         {
             _cachedInstantiated.Remove(instance);
             Addressables.ReleaseInstance(instance);
@@ -117,18 +98,20 @@ namespace Services.Asset
 
         public void Dispose()
         {
-            foreach (var asset in _cachedLoaded.Values)
+            foreach (var asset in _cachedLoading.Values)
             {
                 Addressables.Release(asset);
             }
-
+        
             foreach (GameObject instance in _cachedInstantiated)
             {
                 Addressables.ReleaseInstance(instance);
             }
-
-            _cachedLoaded.Clear();
+        
+            _cachedLoading.Clear();
             _cachedInstantiated.Clear();
         }
+
+        
     }
 }

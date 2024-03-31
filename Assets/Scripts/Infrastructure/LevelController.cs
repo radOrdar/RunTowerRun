@@ -10,6 +10,7 @@ using Services.Ads;
 using Services.Asset;
 using Services.Audio;
 using Services.Events;
+using Services.Factory;
 using Services.Save;
 using Services.ScreenLoading;
 using Services.StaticData;
@@ -34,7 +35,7 @@ namespace Infrastructure
         private IAdsService _adsService;
         private IPersistentDataService _persistentData;
         private ILoadingScreenProvider _loadingScreenProvider;
-        private IAssetProvider _assetProvider;
+        private IGameFactory _gameFactory;
 
         private LevelProgressionData _levelProgressionData;
         private Finish _finish;
@@ -48,7 +49,7 @@ namespace Infrastructure
             _adsService = serviceLocator.Get<IAdsService>();
             _persistentData = serviceLocator.Get<IPersistentDataService>();
             _loadingScreenProvider = serviceLocator.Get<ILoadingScreenProvider>();
-            _assetProvider = serviceLocator.Get<IAssetProvider>();
+            _gameFactory = serviceLocator.Get<IGameFactory>();
             _staticDataService = serviceLocator.Get<IStaticDataService>();
 
             if (!_persistentData.TryGetSubscriptionExpirationDate(out DateTime expirationDateTime) || expirationDateTime.CompareTo(DateTime.Now) < 0)
@@ -66,6 +67,8 @@ namespace Infrastructure
             _levelProgressionData = await _staticDataService.GetData<LevelProgressionData>();
             ProgressionUnit progressionUnit = _levelProgressionData.GetProgression(currentLevel);
             TowerPattern towerPattern = new TowerGenerator().GeneratePattern(progressionUnit);
+            List<int[,]> gatePatterns = Enumerable.Range(0, progressionUnit.numOfGates).Select(_ => towerPattern.towerProjections[RandomDirection()]).ToList();
+            await FindAnyObjectByType<AllGates>().Init(gatePatterns, progressionUnit.distanceBtwGates);
             await FindAnyObjectByType<TowerMove>().Init(towerPattern.towerProjections, progressionUnit);
             await FindAnyObjectByType<TowerBody>().Init(towerPattern.matrix);
             await FindAnyObjectByType<TowerScore>().Init();
@@ -76,10 +79,8 @@ namespace Infrastructure
             _eventService.GatePassed += OnGatePassed;
             _eventService.FinishPassed += OnFinishPassed;
 
-            List<int[,]> gatePatterns = Enumerable.Range(0, progressionUnit.numOfGates).Select(_ => towerPattern.towerProjections[RandomDirection()]).ToList();
-            await FindAnyObjectByType<AllGates>().Init(gatePatterns, progressionUnit.distanceBtwGates);
 
-            _finish = await _assetProvider.InstantiateAsync<Finish>(Constants.Assets.FINISH_LINE, new Vector3(0, 0.1f, progressionUnit.numOfGates * progressionUnit.distanceBtwGates + 40), Quaternion.identity);
+            _finish = await _gameFactory.GetFinishAsync(new Vector3(0, 0.1f, progressionUnit.numOfGates * progressionUnit.distanceBtwGates + 40));
         }
 
         private void OnDestroy()
@@ -90,7 +91,7 @@ namespace Infrastructure
 
             if (_finish != null)
             {
-                _assetProvider.UnloadInstance(_finish.gameObject);
+                _gameFactory.ReleaseInstance(_finish);
             }
         }
 

@@ -7,8 +7,8 @@
         public const string OBSTACLE_FRAME = "ObstacleFrame";
         public const string LOADING_SCREEN = "LoadingScreen";
         public const string UI_POPUP = "UIPopup";
-        public const string FRAME_GHOST_TOP = "FrameGhostTop";
-        public const string FRAME_GHOST_SIDE = "FrameGhostSide";
+        public const string FRAME_GHOST = "FrameGhost";
+        // public const string FRAME_GHOST_SIDE = "FrameGhostSide";
         public const string FIREWORK = "Firework";
         public const string SCORE_GAIN_FX_PF = "ScoreGainFxPf";
         public const string TOWER_BLOCK_PF = "TowerBlockPf";

@@ -4,6 +4,7 @@ using Services;
 using Services.Ads;
 using Services.Asset;
 using Services.Events;
+using Services.Factory;
 using Services.Save;
 using UnityEngine;
 using UnityEngine.Purchasing;
@@ -18,7 +19,7 @@ public class IAPButtonListener : MonoBehaviour
     private IPersistentDataService _persistentDataService;
     private IEventService _eventService;
     private IAdsService _adsService;
-    private IAssetProvider _assetProvider;
+    private IGameFactory _gameFactory;
 
     #endregion
 
@@ -27,7 +28,7 @@ public class IAPButtonListener : MonoBehaviour
         _persistentDataService = ServiceLocator.Instance.Get<IPersistentDataService>();
         _eventService = ServiceLocator.Instance.Get<IEventService>();
         _adsService = ServiceLocator.Instance.Get<IAdsService>();
-        _assetProvider = ServiceLocator.Instance.Get<IAssetProvider>();
+        _gameFactory = ServiceLocator.Instance.Get<IGameFactory>();
     }
 
     public void OnPurchaseComplete(Product product)
@@ -63,9 +64,10 @@ public class IAPButtonListener : MonoBehaviour
 
     private async UniTask ShowPopup(bool success)
     {
-        UiPopup uiPopup = await _assetProvider.InstantiateAsync<UiPopup>(Constants.Assets.UI_POPUP);
+        UiPopup uiPopup = await _gameFactory.GetUiPopupAsync();
+        // UiPopup uiPopup = await _gameFactory.InstantiateAsync<UiPopup>(Constants.Assets.UI_POPUP);
         await uiPopup.AwaitForCompletion(success? "Ads Removed!" : "Smth went wrong Try again later");
-        _assetProvider.UnloadInstance(uiPopup.gameObject);
+        _gameFactory.ReleaseInstance(uiPopup);
     }
     
     bool IsSubscribedTo(Product subscription, out DateTime subExpireDate)

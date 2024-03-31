@@ -1,19 +1,20 @@
 ﻿using Cysharp.Threading.Tasks;
 using Services;
 using Services.Asset;
+using Services.Factory;
 using UnityEngine;
 
 namespace Tower.Components
 {
     public class TowerBody : MonoBehaviour
     {
-        private IAssetProvider _assetProvider;
+        private IGameFactory _gameFactory;
 
         private TowerBlock _blockPf;
         public async UniTask Init(int[][,] matrix)
         {
-            _assetProvider = ServiceLocator.Instance.Get<IAssetProvider>();
-            _blockPf = await _assetProvider.LoadComponentAsync<TowerBlock>(Constants.Assets.TOWER_BLOCK_PF);
+            _gameFactory = ServiceLocator.Instance.Get<IGameFactory>();
+            // _blockPf = await _gameFactory.LoadComponentAsync<TowerBlock>(Constants.Assets.TOWER_BLOCK_PF);
             
             for (int i = 0; i < matrix.Length; i++)
             {
@@ -23,9 +24,10 @@ namespace Tower.Components
                     {
                         if (matrix[i][j, k] == 1)
                         {
-                            Transform towerBlock = Instantiate(_blockPf).transform;
-                            towerBlock.parent = transform;
-                            towerBlock.localPosition = new Vector3(j - 2, i, k - 2);
+                            _gameFactory.GetTowerBlockAsync(new Vector3(j - 2, i, k - 2), transform);
+                            // Transform towerBlock = Instantiate(_blockPf).transform;
+                            // towerBlock.parent = transform;
+                            // towerBlock.localPosition = new Vector3(j - 2, i, k - 2);
                         }
                     }
                 }

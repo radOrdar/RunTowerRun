@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Core.Loading
@@ -29,6 +30,7 @@ namespace Core.Loading
             await UniTask.WhenAll(unloadSceneOperations);
             onProgress(0.7f);
             await SceneManager.LoadSceneAsync(Constants.Scenes.GAME, LoadSceneMode.Additive);
+            UnityEngine.Debug.Log(SceneManager.SetActiveScene(SceneManager.GetSceneByName(Constants.Scenes.GAME)));
         }
     }
 }

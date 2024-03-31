@@ -7,6 +7,7 @@ using Services.Ads;
 using Services.Asset;
 using Services.Audio;
 using Services.Events;
+using Services.Factory;
 using Services.Input;
 using Services.Save;
 using Services.ScreenLoading;
@@ -44,24 +45,25 @@ namespace Infrastructure
 
         private async UniTask RegisterServices()
         {
-            var serviceLocator = ServiceLocator.Instance;
+            ServiceLocator serviceLocator = ServiceLocator.Instance;
+            
+            AssetProvider assetProvider = new AssetProvider();
+            StaticDataService staticDataService = new StaticDataService(assetProvider);
+            GameFactory gameFactory = new GameFactory(assetProvider);
 
             serviceLocator.Register<IEventService>(new EventService());
             serviceLocator.Register<IInputService>(new InputService());
             serviceLocator.Register<IPersistentDataService>(new PersistentDataService());
-            
-            var assetProvider = new AssetProvider();
-            var staticDataService = new StaticDataService(assetProvider);
-            
             serviceLocator.Register<IAssetProvider>(assetProvider);
             serviceLocator.Register<IStaticDataService>(staticDataService);
-            serviceLocator.Register<ILoadingScreenProvider>(new LoadingScreenProvider(assetProvider));
+            serviceLocator.Register<IGameFactory>(gameFactory);
+            serviceLocator.Register<ILoadingScreenProvider>(new LoadingScreenProvider(gameFactory));
             
             SoundsData soundsData = await staticDataService.GetData<SoundsData>();
             serviceLocator.Register<IAudioService>(new AudioService(soundsData));
 
-            AppConfigurationData appData = await staticDataService.GetData<AppConfigurationData>();
-            serviceLocator.Register<IAdsService>(new AdsService(appData));
+            AppConfigurationData appConfigurationData = await staticDataService.GetData<AppConfigurationData>();
+            serviceLocator.Register<IAdsService>(new AdsService(appConfigurationData));
         }
     }
 }

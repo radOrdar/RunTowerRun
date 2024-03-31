@@ -16,24 +16,17 @@ public class ScoreGainFx : MonoBehaviour
 
     public IObjectPool<ScoreGainFx> Origin;
 
-    public void SetValue(int value)
-    {
-        text.SetText($"+{value}");
-    }
-
-    private void Awake()
+    public void Init(Transform parent, int value)
     {
         text = GetComponentInChildren<TextMeshProUGUI>();
         canvasGroup = GetComponent<CanvasGroup>();
-    }
-
-    private void OnEnable()
-    {
+        
+        text.SetText($"+{value}");
+        transform.SetParent(parent);
         transform.localPosition = Vector3.zero;
         canvasGroup.alpha = 1;
         StartCoroutine(AnimateAndRelease());
     }
-
     private IEnumerator AnimateAndRelease()
     {
         float time = 0;

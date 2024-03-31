@@ -17,7 +17,7 @@ MonoBehaviour:
     ledges: 3
     normalSpeed: 25
     hasteSpeed: 55
-    numOfGates: 20
+    numOfGates: 3
     distanceBtwGates: 80
   - height: 8
     ledges: 3
